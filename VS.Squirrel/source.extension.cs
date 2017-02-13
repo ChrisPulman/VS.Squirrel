@@ -11,7 +11,7 @@ namespace AutoSquirrel
         public const string Name = "VS.Squirrel";
         public const string Description = @"Visual Studio Squirrel Packager - Create installer from Visual Studio and Deploy to a local file system or to Amazon S3 storage.";
         public const string Language = "en-US";
-        public const string Version = "1.0.0";
+        public const string Version = "0.0.0";
         public const string Author = "Chris Pulman";
         public const string Tags = "";
     }
