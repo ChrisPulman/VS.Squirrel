@@ -585,7 +585,7 @@
                 cmd += $@" -i '{this.Model.IconFilepath}'";
             }
 
-            var squirrel = Path.Combine(Environment.CurrentDirectory, @"tools\Squirrel-Windows.exe");
+            var squirrel = @"tools\Squirrel-Windows.exe";
             if (File.Exists(squirrel))
             {
                 var startInfo = new ProcessStartInfo()
