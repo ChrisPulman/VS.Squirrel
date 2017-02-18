@@ -61,6 +61,13 @@
                             }
                         }
 
+                        if (string.IsNullOrWhiteSpace(this.Model.MainExePath))
+                        {
+                            this.Model = new AutoSquirrelModel();
+                            VSHelper.ProjectIsValid.Value = false;
+                            return;
+                        }
+
                         this.Model.PackageFiles = AutoSquirrelModel.OrderFileList(this.Model.PackageFiles);
                         this.ProjectFilePath = Path.GetDirectoryName(x.Project.FileName);
 
@@ -125,7 +132,7 @@
                         }
                         this.Save();
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         VSHelper.ProjectIsValid.Value = false;
                     }
@@ -585,7 +592,7 @@
                 cmd += $@" -i '{this.Model.IconFilepath}'";
             }
 
-            var squirrel = @"tools\Squirrel-Windows.exe";
+            var squirrel = Path.Combine(Path.GetDirectoryName(typeof(ShellViewModel).Assembly.Location), @"tools\Squirrel-Windows.exe");
             if (File.Exists(squirrel))
             {
                 var startInfo = new ProcessStartInfo()
