@@ -12,6 +12,7 @@
     d:DesignHeight="768"
     d:DesignWidth="1024"
     Background="LightBlue"
+    Visibility="{Binding ToolVisibility}"
     mc:Ignorable="d">
     <xctk:BusyIndicator
         x:Name="ShellBusyIndicator"

@@ -21,6 +21,7 @@ namespace AutoSquirrel
         //http://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-s3-bucket-naming-requirements.html
         private string _bucketName;
 
+        private string _fileSystemPath;
         private string _regionName;
         private string _secretAccessKey;
 
@@ -85,6 +86,24 @@ namespace AutoSquirrel
                 }
 
                 NotifyOfPropertyChange(() => this.BucketName);
+                NotifyOfPropertyChange(() => this.SetupDownloadUrl);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the file system path.
+        /// </summary>
+        /// <value>The file system path.</value>
+        [DataMember(IsRequired = false)]
+        public string FileSystemPath
+        {
+            get => this._fileSystemPath;
+
+            set
+            {
+                this._fileSystemPath = value;
+
+                NotifyOfPropertyChange(() => this.FileSystemPath);
                 NotifyOfPropertyChange(() => this.SetupDownloadUrl);
             }
         }

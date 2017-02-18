@@ -8,9 +8,9 @@
 - [x] Add the ability to Publish to an S3 storage account
 - [x] Add the ability to Build Full Releases
 - [x] Add the ability to Build Update Releases
-- [ ] Test with multiple projects
+- [x] Test with multiple projects
+- [x] Gate the visibility of the toolwindow to Project selection only
 - [ ] Detect projects that have no exe in build folder
-- [ ] Gate the visibility of the toolwindow to Project selection only
 - [ ] Check that the project has been saved
 - [ ] Check that the project has been built
 ---
@@ -30,3 +30,8 @@ on the official Visual Studio extension gallery.
 - [x] Filter out unwanted files
 - [x] Detect the exe version, Author and Description
 - [x] Releasify the files from this folder
+
+## 0.0.2
+- [x] Fix bug with spaces in the output path during releasify
+- [x] Added automatic visualisation of the Squirrel Packager when project is selected
+- [x] Execute on a background thread to allow VS to continue operating without locking

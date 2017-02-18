@@ -35,7 +35,7 @@ namespace AutoSquirrel
         /// </summary>
         public SquirrelPackager() : base(null)
         {
-            this.Caption = "Squirrel Packager";
+            VSHelper.Caption.Subscribe(caption => this.Caption = caption);
 
             // This is the user control hosted by the tool window; Note that, even if this class
             // implements IDisposable, we are not calling Dispose on this object. This is because
@@ -45,20 +45,7 @@ namespace AutoSquirrel
 
         public int OnActiveProjectCfgChange(IVsHierarchy pIVsHierarchy)
         {
-            EnvDTE.Project pro = VSHelper.GetDTEProject(pIVsHierarchy);
-            if (pro != null)
-            {
-                if (VSHelper.SelectedProject.Value == null)
-                {
-                    VSHelper.SetProjectFiles(pro);
-                    VSHelper.SelectedProject.Value = pro;
-                    return VSConstants.S_OK;
-                }
-                if (VSHelper.SelectedProject.Value.FileName == pro.FileName)
-                {
-                    VSHelper.SetProjectFiles(pro);
-                }
-            }
+            this.Update(pIVsHierarchy);
             return VSConstants.S_OK;
         }
 
@@ -68,7 +55,7 @@ namespace AutoSquirrel
 
         public int OnSelectionChanged(IVsHierarchy pHierOld, uint itemidOld, IVsMultiItemSelect pMISOld, ISelectionContainer pSCOld, IVsHierarchy pHierNew, uint itemidNew, IVsMultiItemSelect pMISNew, ISelectionContainer pSCNew)
         {
-            VSHelper.SetCurrentProject(pHierNew, itemidNew);
+            this.Update(pHierNew, itemidNew);
             return VSConstants.S_OK;
         }
 
@@ -82,6 +69,7 @@ namespace AutoSquirrel
 
         protected override void Dispose(bool disposing)
         {
+            VSHelper.ProjectIsValid.Value = false;
             var monitorSelection = (IVsMonitorSelection)this.GetService(typeof(SVsShellMonitorSelection));
             monitorSelection.UnadviseSelectionEvents(this.monCookie);
             var monitorBuild = (IVsSolutionBuildManager)this.GetService(typeof(SVsSolutionBuildManager));
@@ -96,5 +84,20 @@ namespace AutoSquirrel
             var monitorBuild = (IVsSolutionBuildManager)this.GetService(typeof(SVsSolutionBuildManager));
             monitorBuild.AdviseUpdateSolutionEvents(this, out this.buildCookie);
         }
+
+        private void Update(IVsHierarchy pIVsHierarchy, uint itemidNew) => System.Threading.Tasks.Task.Run(() => VSHelper.SetCurrentProject(pIVsHierarchy, itemidNew)).ConfigureAwait(false);
+
+        private void Update(IVsHierarchy pIVsHierarchy) => System.Threading.Tasks.Task.Run(() =>
+                                                         {
+                                                             EnvDTE.Project pro = VSHelper.GetDTEProject(pIVsHierarchy);
+                                                             if (pro != null)
+                                                             {
+                                                                 VSHelper.SetProjectFiles(pro);
+                                                             }
+                                                             else
+                                                             {
+                                                                 VSHelper.ProjectIsValid.Value = false;
+                                                             }
+                                                         }).ConfigureAwait(false);
     }
 }

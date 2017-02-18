@@ -13,6 +13,7 @@
     using AutoSquirrel.Services.Helpers;
     using System.Reactive.Linq;
     using System.Xml;
+    using System.Reactive.Concurrency;
 
     /// <summary>
     /// Shell View Model
@@ -28,6 +29,7 @@
         private bool _isSaved;
         private AutoSquirrelModel _model;
         private int _publishMode;
+        private Visibility _toolVisibility = Visibility.Visible;
         private Process exeProcess;
 
         /// <summary>
@@ -36,13 +38,20 @@
         public ShellViewModel()
         {
             this.Model = new AutoSquirrelModel();
-            VSHelper.ProjectFiles
-                .Where(x => x != null)
-                .Subscribe(files =>
+            SquirrelPackagerPackage._dte.Events.BuildEvents.OnBuildDone += this.BuildEvents_OnBuildDone;
+
+            VSHelper.ProjectFiles.Where(x => x != null)
+                .CombineLatest(VSHelper.SelectedProject.Where(x => x != null),
+                (f, p) => new { Files = f, Project = p })
+                .Throttle(TimeSpan.FromMilliseconds(500))
+                .ObserveOn(DispatcherScheduler.Current)
+                .Subscribe(x =>
                 {
+                    var d = x.Project.IsDirty;
+
                     this.Model.PackageFiles.Clear();
                     ItemLink targetItem = null;
-                    foreach (var filePath in files)
+                    foreach (var filePath in x.Files)
                     {
                         // exclude unwanted files
                         if (!filePath.Contains(".pdb") && !filePath.Contains(".nupkg") && !filePath.Contains(".vshost."))
@@ -52,46 +61,57 @@
                     }
 
                     this.Model.PackageFiles = AutoSquirrelModel.OrderFileList(this.Model.PackageFiles);
-                });
-            VSHelper.SelectedProject
-                .Where(x => x != null)
-                .Subscribe(pro =>
-                {
-                    var d = pro.IsDirty;
-                    this.FilePath = Path.GetDirectoryName(pro.FileName);
+                    this.ProjectFilePath = Path.GetDirectoryName(x.Project.FileName);
 
                     var xmldoc = new XmlDocument();
-                    xmldoc.Load(pro.FileName);
-
+                    xmldoc.Load(x.Project.FileName);
                     var mgr = new XmlNamespaceManager(xmldoc.NameTable);
                     mgr.AddNamespace("x", "http://schemas.microsoft.com/developer/msbuild/2003");
                     const string msbuild = "//x:";
                     ////// ApplicationIcon
                     foreach (XmlNode item in xmldoc.SelectNodes(msbuild + "ApplicationIcon", mgr))
                     {
-                        this.Model.IconFilepath = Path.Combine(this.FilePath, item.InnerText);
+                        this.Model.IconFilepath = Path.Combine(this.ProjectFilePath, item.InnerText);
                     }
 
-                    // try to retrieve S3 data settings else default to FileSystem
-                    var baseDir = Directory.GetParent(this.FilePath).FullName;
-                    var file = Path.Combine(baseDir, $"{this.Model.AppId}.asproj");
+                    // try to retrieve existing settings
+                    var file = Path.Combine(this.ProjectFilePath, $"{this.Model.AppId}.asproj");
                     if (File.Exists(file))
                     {
                         AutoSquirrelModel m = FileUtility.Deserialize<AutoSquirrelModel>(file);
-                        if (m?.SelectedConnectionString.Contains("File System") == false)
+                        if (!string.IsNullOrWhiteSpace(m?.SelectedConnectionString))
                         {
                             this.Model.SelectedConnectionString = m.SelectedConnectionString;
                             this.Model.SelectedConnection = m.SelectedConnection;
+                            if (this.Model.SelectedConnection is FileSystemConnection con && !string.IsNullOrWhiteSpace(con.FileSystemPath))
+                            {
+                                this.FilePath = con.FileSystemPath.Replace($"\\{this.Model.AppId}_files\\Releases", "");
+                            }
+                            else if (this.Model.SelectedConnection is AmazonS3Connection s3con)
+                            {
+                                if (string.IsNullOrWhiteSpace(s3con.FileSystemPath))
+                                {
+                                    this.FilePath = this.ProjectFilePath;
+                                }
+                                else
+                                {
+                                    this.FilePath = s3con.FileSystemPath.Replace($"\\{this.Model.AppId}_files\\Releases", "");
+                                }
+                            }
                         }
                     }
+
+                    // If not able to read settings default to FileSystem settings
                     if (string.IsNullOrWhiteSpace(this.Model.SelectedConnectionString))
                     {
+                        this.FilePath = this.ProjectFilePath;
                         this.Model.SelectedConnectionString = "File System";
-                        if (this.Model.SelectedConnection is FileSystemConnection con)
+                        if (!string.IsNullOrWhiteSpace(this.ProjectFilePath) && !string.IsNullOrWhiteSpace(this.Model.AppId) && this.Model.SelectedConnection is FileSystemConnection con)
                         {
-                            con.FileSystemPath = Path.Combine(baseDir, $"{this.Model.AppId}_files\\Releases");
+                            con.FileSystemPath = Path.Combine(this.FilePath, $"{this.Model.AppId}_files\\Releases");
                         }
                     }
+                    this.Save();
                 });
         }
 
@@ -127,8 +147,20 @@
 
             set
             {
+                // Check that Filepath has no spaces
+                if (value.Contains(" "))
+                {
+                    SelectFilePath(value);
+                    return;
+                }
                 this.Model.CurrentFilePath = value;
                 NotifyOfPropertyChange(() => this.FilePath);
+                var fp = "New Project*";
+                if (!string.IsNullOrWhiteSpace(this.FilePath))
+                {
+                    fp = Path.GetFileNameWithoutExtension(this.FilePath);
+                }
+                VSHelper.Caption.Value = $"Squirrel Packager {PathFolderHelper.GetProgramVersion()} - {fp}";
             }
         }
 
@@ -163,24 +195,48 @@
         }
 
         /// <summary>
+        /// Gets the project file path.
+        /// </summary>
+        /// <value>The project file path.</value>
+        public string ProjectFilePath { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the tool visibility.
+        /// </summary>
+        /// <value>The tool visibility.</value>
+        public Visibility ToolVisibility
+        {
+            get => this._toolVisibility;
+
+            set
+            {
+                this._toolVisibility = value;
+                NotifyOfPropertyChange(() => this.ToolVisibility);
+            }
+        }
+
+        /// <summary>
         /// Gets the window title.
         /// </summary>
         /// <value>The window title.</value>
-
         public string WindowTitle
         {
             get
             {
-                var fp = "New Project" + "*";
+                var fp = "New Project*";
                 if (!string.IsNullOrWhiteSpace(this.FilePath))
                 {
                     fp = Path.GetFileNameWithoutExtension(this.FilePath);
                 }
-
-                return string.Format("{0} {1} - {2}", PathFolderHelper.ProgramName, PathFolderHelper.GetProgramVersion(), fp);
+                VSHelper.Caption.Value = $"Squirrel Packager {PathFolderHelper.GetProgramVersion()} - {fp}";
+                return VSHelper.Caption.Value;
             }
         }
 
+        /// <summary>
+        /// Gets the window title.
+        /// </summary>
+        /// <value>The window title.</value>
         /// <summary>
         /// Aborts the package creation.
         /// </summary>
@@ -284,6 +340,31 @@
             PublishPackage();
         }
 
+        /// <summary>
+        /// Selects the file path.
+        /// </summary>
+        /// <param name="currentPath">The current path.</param>
+        public void SelectFilePath(string currentPath)
+        {
+            var dialog = new System.Windows.Forms.FolderBrowserDialog();
+
+            if (Directory.Exists(currentPath))
+            {
+                dialog.SelectedPath = currentPath;
+                dialog.Description = "Please select a new File Path that does not contain Spaces";
+                dialog.ShowNewFolderButton = true;
+            }
+
+            System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+
+            if (result != System.Windows.Forms.DialogResult.OK)
+            {
+                return;
+            }
+
+            this.FilePath = dialog.SelectedPath;
+        }
+
         internal string CreateNugetPackage(AutoSquirrelModel model)
         {
             var metadata = new ManifestMetadata()
@@ -327,9 +408,9 @@
             {
                 throw new Exception("File Path is invalid");
             }
-            var baseDir = Directory.GetParent(this.FilePath).FullName;
-            this.Model.NupkgOutputPath = baseDir + Path.DirectorySeparatorChar + this.Model.AppId + "_files" + PathFolderHelper.PackageDirectory;
-            this.Model.SquirrelOutputPath = baseDir + Path.DirectorySeparatorChar + this.Model.AppId + "_files" + PathFolderHelper.ReleasesDirectory;
+
+            this.Model.NupkgOutputPath = this.FilePath + Path.DirectorySeparatorChar + this.Model.AppId + "_files" + PathFolderHelper.PackageDirectory;
+            this.Model.SquirrelOutputPath = this.FilePath + Path.DirectorySeparatorChar + this.Model.AppId + "_files" + PathFolderHelper.ReleasesDirectory;
 
             if (!Directory.Exists(this.Model.NupkgOutputPath))
             {
@@ -341,9 +422,9 @@
                 Directory.CreateDirectory(this.Model.SquirrelOutputPath);
             }
 
-            FileUtility.SerializeToFile(Path.Combine(baseDir, $"{this.Model.AppId}.asproj"), this.Model);
+            FileUtility.SerializeToFile(Path.Combine(this.ProjectFilePath, $"{this.Model.AppId}.asproj"), this.Model);
 
-            Trace.WriteLine("FILE SAVED ! : " + baseDir);
+            Trace.WriteLine("FILE SAVED ! : " + this.ProjectFilePath);
 
             this._isSaved = true;
 
@@ -415,6 +496,8 @@
             this.CurrentPackageCreationStage = message;
         }
 
+        private void BuildEvents_OnBuildDone(EnvDTE.vsBuildScope Scope, EnvDTE.vsBuildAction Action) => VSHelper.SetProjectFiles(VSHelper.SelectedProject.Value);
+
         /// <summary>
         /// Called on package created. Start the upload.
         /// </summary>
@@ -482,19 +565,36 @@
 
             if (File.Exists(this.Model.IconFilepath))
             {
-                cmd += @" -i " + this.Model.IconFilepath;
+                cmd += $@" -i '{this.Model.IconFilepath}'";
             }
 
-            var startInfo = new ProcessStartInfo()
+            var squirrel = Path.Combine(Environment.CurrentDirectory, @"tools\Squirrel-Windows.exe");
+            if (File.Exists(squirrel))
             {
-                WindowStyle = ProcessWindowStyle.Hidden,
-                FileName = @"tools\Squirrel-Windows.exe",
-                Arguments = cmd
-            };
+                var startInfo = new ProcessStartInfo()
+                {
+                    WindowStyle = ProcessWindowStyle.Normal,
+                    FileName = squirrel,
 
-            using (this.exeProcess = Process.Start(startInfo))
+                    Arguments = cmd,
+                    UseShellExecute = false
+                };
+
+                using (this.exeProcess = Process.Start(startInfo))
+                {
+                    try
+                    {
+                        this.exeProcess.WaitForExit();
+                    }
+                    catch (Exception)
+                    {
+                        throw;
+                    }
+                }
+            }
+            else
             {
-                this.exeProcess.WaitForExit();
+                MessageBox.Show(squirrel, "Error finding Squirrel", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }

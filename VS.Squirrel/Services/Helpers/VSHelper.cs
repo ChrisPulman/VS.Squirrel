@@ -14,6 +14,9 @@ using System.Linq;
 
 namespace AutoSquirrel.Services.Helpers
 {
+    /// <summary>
+    /// Visual Studio Helper
+    /// </summary>
     public static class VSHelper
     {
         private static DTE2 _dte = SquirrelPackagerPackage._dte;
@@ -24,12 +27,43 @@ namespace AutoSquirrel.Services.Helpers
         private static string solFile;
         private static string solUserOpts;
 
+        /// <summary>
+        /// Gets the build path.
+        /// </summary>
+        /// <value>The build path.</value>
         public static ReactiveProperty<string> BuildPath { get; } = new ReactiveProperty<string>();
 
+        /// <summary>
+        /// Gets the caption.
+        /// </summary>
+        /// <value>The caption.</value>
+        public static ReactiveProperty<string> Caption { get; } = new ReactiveProperty<string>("Squirrel Packager");
+
+        /// <summary>
+        /// Gets the project files.
+        /// </summary>
+        /// <value>The project files.</value>
         public static ReactiveProperty<IEnumerable<string>> ProjectFiles { get; } = new ReactiveProperty<IEnumerable<string>>();
 
+        /// <summary>
+        /// Gets the project is valid.
+        /// </summary>
+        /// <value>The project is valid.</value>
+        public static ReactiveProperty<bool> ProjectIsValid { get; } = new ReactiveProperty<bool>(false);
+
+        /// <summary>
+        /// Gets the selected project.
+        /// </summary>
+        /// <value>The selected project.</value>
         public static ReactiveProperty<Project> SelectedProject { get; } = new ReactiveProperty<Project>();
 
+        /// <summary>
+        /// Adds the file to project.
+        /// </summary>
+        /// <param name="project">The project.</param>
+        /// <param name="file">The file.</param>
+        /// <param name="itemType">Type of the item.</param>
+        /// <returns></returns>
         public static ProjectItem AddFileToProject(this Project project, FileInfo file, string itemType = null)
 
         {
@@ -52,6 +86,12 @@ namespace AutoSquirrel.Services.Helpers
             return item;
         }
 
+        /// <summary>
+        /// Cleans the name space.
+        /// </summary>
+        /// <param name="ns">The ns.</param>
+        /// <param name="stripPeriods">if set to <c>true</c> [strip periods].</param>
+        /// <returns></returns>
         public static string CleanNameSpace(string ns, bool stripPeriods = true)
         {
             if (stripPeriods)
@@ -66,6 +106,10 @@ namespace AutoSquirrel.Services.Helpers
             return ns;
         }
 
+        /// <summary>
+        /// Gets the active project.
+        /// </summary>
+        /// <returns></returns>
         public static Project GetActiveProject()
         {
             try
@@ -96,6 +140,11 @@ namespace AutoSquirrel.Services.Helpers
             return null;
         }
 
+        /// <summary>
+        /// Gets the DTE project.
+        /// </summary>
+        /// <param name="hierarchy">The hierarchy.</param>
+        /// <returns></returns>
         public static Project GetDTEProject(IVsHierarchy hierarchy)
         {
             if (hierarchy == null)
@@ -107,6 +156,11 @@ namespace AutoSquirrel.Services.Helpers
             return obj as Project;
         }
 
+        /// <summary>
+        /// Gets the projects.
+        /// </summary>
+        /// <param name="solution">The solution.</param>
+        /// <returns></returns>
         public static IEnumerable<Project> GetProjects(IVsSolution solution)
         {
             foreach (IVsHierarchy hier in GetProjectsInSolution(solution))
@@ -119,8 +173,19 @@ namespace AutoSquirrel.Services.Helpers
             }
         }
 
+        /// <summary>
+        /// Gets the projects in solution.
+        /// </summary>
+        /// <param name="solution">The solution.</param>
+        /// <returns></returns>
         public static IEnumerable<IVsHierarchy> GetProjectsInSolution(IVsSolution solution) => GetProjectsInSolution(solution, __VSENUMPROJFLAGS.EPF_LOADEDINSOLUTION);
 
+        /// <summary>
+        /// Gets the projects in solution.
+        /// </summary>
+        /// <param name="solution">The solution.</param>
+        /// <param name="flags">The flags.</param>
+        /// <returns></returns>
         public static IEnumerable<IVsHierarchy> GetProjectsInSolution(IVsSolution solution, __VSENUMPROJFLAGS flags)
         {
             if (solution == null)
@@ -145,6 +210,11 @@ namespace AutoSquirrel.Services.Helpers
             }
         }
 
+        /// <summary>
+        /// Gets the root folder.
+        /// </summary>
+        /// <param name="project">The project.</param>
+        /// <returns></returns>
         public static string GetRootFolder(this Project project)
         {
             if (project == null)
@@ -202,6 +272,11 @@ namespace AutoSquirrel.Services.Helpers
             return null;
         }
 
+        /// <summary>
+        /// Gets the root namespace.
+        /// </summary>
+        /// <param name="project">The project.</param>
+        /// <returns></returns>
         public static string GetRootNamespace(this Project project)
         {
             if (project == null)
@@ -225,6 +300,10 @@ namespace AutoSquirrel.Services.Helpers
             return CleanNameSpace(ns, stripPeriods: false);
         }
 
+        /// <summary>
+        /// Gets the selected item.
+        /// </summary>
+        /// <returns></returns>
         public static object GetSelectedItem()
         {
             object selectedObject = null;
@@ -253,6 +332,9 @@ namespace AutoSquirrel.Services.Helpers
             return selectedObject;
         }
 
+        /// <summary>
+        /// Gets the solution projects.
+        /// </summary>
         public static void GetSolutionProjects()
         {
             // get current solution
@@ -292,6 +374,12 @@ namespace AutoSquirrel.Services.Helpers
             }
         }
 
+        /// <summary>
+        /// Determines whether the specified project is kind.
+        /// </summary>
+        /// <param name="project">The project.</param>
+        /// <param name="kindGuids">The kind guids.</param>
+        /// <returns><c>true</c> if the specified project is kind; otherwise, <c>false</c>.</returns>
         public static bool IsKind(this Project project, params string[] kindGuids)
         {
             foreach (var guid in kindGuids)
@@ -306,16 +394,21 @@ namespace AutoSquirrel.Services.Helpers
             return false;
         }
 
+        /// <summary>
+        /// Sets the current project.
+        /// </summary>
+        /// <param name="pHierNew">The p hier new.</param>
+        /// <param name="itemidNew">The itemid new.</param>
         public static void SetCurrentProject(IVsHierarchy pHierNew, uint itemidNew)
         {
             try
             {
                 // try to get the active project first
                 Project activeProject = GetActiveProject();
+
                 if (activeProject != null)
                 {
                     VSHelper.SetProjectFiles(activeProject);
-                    VSHelper.SelectedProject.Value = activeProject;
                     return;
                 }
             }
@@ -323,23 +416,30 @@ namespace AutoSquirrel.Services.Helpers
             {
             }
 
-            if (pHierNew != null)
-            {
-                try
-                {
-                    ErrorHandler.ThrowOnFailure(pHierNew.GetProperty(itemidNew, (int)__VSHPROPID.VSHPROPID_ExtObject, out var selectedObject));
-                    if (selectedObject is Project project)
-                    {
-                        VSHelper.SetProjectFiles(project);
-                        VSHelper.SelectedProject.Value = project;
-                    }
-                }
-                catch
-                {
-                }
-            }
+            //if (pHierNew != null)
+            //{
+            //    try
+            //    {
+            //        ErrorHandler.ThrowOnFailure(pHierNew.GetProperty(itemidNew, (int)__VSHPROPID.VSHPROPID_ExtObject, out var selectedObject));
+
+            //        if (selectedObject is Project project)
+            //        {
+            //            VSHelper.SetProjectFiles(project);
+            //            return;
+            //        }
+            //    }
+            //    catch
+            //    {
+            //    }
+            //}
+            VSHelper.ProjectIsValid.Value = false;
         }
 
+        /// <summary>
+        /// Sets the type of the item.
+        /// </summary>
+        /// <param name="item">The item.</param>
+        /// <param name="itemType">Type of the item.</param>
         public static void SetItemType(this ProjectItem item, string itemType)
 
         {
@@ -367,10 +467,15 @@ namespace AutoSquirrel.Services.Helpers
             }
         }
 
+        /// <summary>
+        /// Sets the project files.
+        /// </summary>
+        /// <param name="project">The project.</param>
         public static void SetProjectFiles(Project project)
         {
             if (string.IsNullOrWhiteSpace(project.FileName))
             {
+                VSHelper.ProjectIsValid.Value = false;
                 return;
             }
 
@@ -420,6 +525,8 @@ namespace AutoSquirrel.Services.Helpers
             {
                 VSHelper.ProjectFiles.Value = Directory.EnumerateFileSystemEntries(VSHelper.BuildPath.Value);
             }
+            VSHelper.SelectedProject.Value = project;
+            VSHelper.ProjectIsValid.Value = true;
         }
 
         private static IEnumerable<Project> GetChildProjects(Project parent)
@@ -447,6 +554,9 @@ namespace AutoSquirrel.Services.Helpers
                                         .SelectMany(p => GetChildProjects(p.SubProject));
         }
 
+        /// <summary>
+        /// Project Types
+        /// </summary>
         public static class ProjectTypes
         {
             public const string ASPNET_5 = "{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}";

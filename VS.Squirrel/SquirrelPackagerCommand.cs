@@ -8,6 +8,7 @@ using System;
 using System.ComponentModel.Design;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using AutoSquirrel.Services.Helpers;
 
 namespace AutoSquirrel
 {
@@ -47,6 +48,20 @@ namespace AutoSquirrel
                 var menuItem = new MenuCommand(this.ShowToolWindow, menuCommandID);
                 commandService.AddCommand(menuItem);
             }
+
+            IVsWindowFrame windowFrame = GetWindowFrame();
+
+            VSHelper.ProjectIsValid.Subscribe(ok =>
+            {
+                if (ok)
+                {
+                    Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
+                }
+                else
+                {
+                    Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.CloseFrame((uint)__FRAMECLOSE.FRAMECLOSE_SaveIfDirty));
+                }
+            });
         }
 
         /// <summary>
@@ -65,13 +80,7 @@ namespace AutoSquirrel
         /// <param name="package">Owner package, not null.</param>
         public static void Initialize(Package package) => Instance = new SquirrelPackagerCommand(package);
 
-        /// <summary>
-        /// Shows the tool window when the menu item is clicked.
-        /// </summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event args.</param>
-        /// <exception cref="NotSupportedException"></exception>
-        private void ShowToolWindow(object sender, EventArgs e)
+        public IVsWindowFrame GetWindowFrame()
         {
             // Get the instance number 0 of this tool window. This window is single instance so this
             // instance is actually the only one. The last flag is set to true so that if the tool
@@ -82,8 +91,15 @@ namespace AutoSquirrel
                 throw new NotSupportedException("Cannot create tool window");
             }
 
-            var windowFrame = (IVsWindowFrame)window.Frame;
-            Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
+            return (IVsWindowFrame)window.Frame;
         }
+
+        /// <summary>
+        /// Shows the tool window when the menu item is clicked.
+        /// </summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event args.</param>
+        /// <exception cref="NotSupportedException"></exception>
+        private void ShowToolWindow(object sender, EventArgs e) => Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(GetWindowFrame().Show());
     }
 }
