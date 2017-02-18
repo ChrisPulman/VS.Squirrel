@@ -38,18 +38,20 @@
         public ShellViewModel()
         {
             var lastproject = string.Empty;
+            var errorMessageShown = false;
             SquirrelPackagerPackage._dte.Events.BuildEvents.OnBuildDone += (Scope, Action) =>
             {
                 try
                 {
                     if (VSHelper.SelectedProject.Value != null)
                     {
+                        errorMessageShown = false;
                         lastproject = string.Empty;
                         this.Model = new AutoSquirrelModel();
                         VSHelper.SetProjectFiles(VSHelper.SelectedProject.Value);
                     }
                 }
-                catch (Exception ex)
+                catch
                 {
                 }
             };
@@ -161,7 +163,18 @@
                             s3con2.FileSystemPath = Path.Combine(this.FilePath, $"{this.Model.AppId}_files\\Releases");
                         }
                         this.Save();
-                        VSHelper.ProjectIsValid.Value = this.Model.IsValid;
+                        if (this.Model.IsValid)
+                        {
+                            VSHelper.ProjectIsValid.Value = true;
+                        }
+                        else
+                        {
+                            if (!errorMessageShown)
+                            {
+                                MessageBox.Show(this.Model.Error, "Please correct the following issues with your project", MessageBoxButton.OK, MessageBoxImage.Error);
+                                errorMessageShown = true;
+                            }
+                        }
                     }
                     catch (Exception)
                     {

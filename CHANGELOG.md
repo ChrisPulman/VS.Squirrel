@@ -35,3 +35,6 @@ on the official Visual Studio extension gallery.
 - [x] Fix bug with spaces in the output path during releasify
 - [x] Added automatic visualisation of the Squirrel Packager when project is selected
 - [x] Execute on a background thread to allow VS to continue operating without locking
+
+## 0.0.12
+- [x] Show warnings for missing settings in project AssemblyInfo
