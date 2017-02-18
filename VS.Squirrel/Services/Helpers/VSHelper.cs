@@ -416,22 +416,22 @@ namespace AutoSquirrel.Services.Helpers
             {
             }
 
-            //if (pHierNew != null)
-            //{
-            //    try
-            //    {
-            //        ErrorHandler.ThrowOnFailure(pHierNew.GetProperty(itemidNew, (int)__VSHPROPID.VSHPROPID_ExtObject, out var selectedObject));
+            if (pHierNew != null)
+            {
+                try
+                {
+                    ErrorHandler.ThrowOnFailure(pHierNew.GetProperty(itemidNew, (int)__VSHPROPID.VSHPROPID_ExtObject, out var selectedObject));
 
-            //        if (selectedObject is Project project)
-            //        {
-            //            VSHelper.SetProjectFiles(project);
-            //            return;
-            //        }
-            //    }
-            //    catch
-            //    {
-            //    }
-            //}
+                    if (selectedObject is Project project)
+                    {
+                        VSHelper.SetProjectFiles(project);
+                        return;
+                    }
+                }
+                catch
+                {
+                }
+            }
             VSHelper.ProjectIsValid.Value = false;
         }
 

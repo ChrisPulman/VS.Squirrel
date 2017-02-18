@@ -37,7 +37,6 @@
         /// </summary>
         public ShellViewModel()
         {
-            this.Model = new AutoSquirrelModel();
             SquirrelPackagerPackage._dte.Events.BuildEvents.OnBuildDone += this.BuildEvents_OnBuildDone;
 
             VSHelper.ProjectFiles.Where(x => x != null)
@@ -47,71 +46,89 @@
                 .ObserveOn(DispatcherScheduler.Current)
                 .Subscribe(x =>
                 {
-                    var d = x.Project.IsDirty;
-
-                    this.Model.PackageFiles.Clear();
-                    ItemLink targetItem = null;
-                    foreach (var filePath in x.Files)
+                    try
                     {
-                        // exclude unwanted files
-                        if (!filePath.Contains(".pdb") && !filePath.Contains(".nupkg") && !filePath.Contains(".vshost."))
+                        var d = x.Project.IsDirty;
+
+                        this.Model = new AutoSquirrelModel();
+                        ItemLink targetItem = null;
+                        foreach (var filePath in x.Files)
                         {
-                            this.Model.AddFile(filePath, targetItem);
-                        }
-                    }
-
-                    this.Model.PackageFiles = AutoSquirrelModel.OrderFileList(this.Model.PackageFiles);
-                    this.ProjectFilePath = Path.GetDirectoryName(x.Project.FileName);
-
-                    var xmldoc = new XmlDocument();
-                    xmldoc.Load(x.Project.FileName);
-                    var mgr = new XmlNamespaceManager(xmldoc.NameTable);
-                    mgr.AddNamespace("x", "http://schemas.microsoft.com/developer/msbuild/2003");
-                    const string msbuild = "//x:";
-                    ////// ApplicationIcon
-                    foreach (XmlNode item in xmldoc.SelectNodes(msbuild + "ApplicationIcon", mgr))
-                    {
-                        this.Model.IconFilepath = Path.Combine(this.ProjectFilePath, item.InnerText);
-                    }
-
-                    // try to retrieve existing settings
-                    var file = Path.Combine(this.ProjectFilePath, $"{this.Model.AppId}.asproj");
-                    if (File.Exists(file))
-                    {
-                        AutoSquirrelModel m = FileUtility.Deserialize<AutoSquirrelModel>(file);
-                        if (!string.IsNullOrWhiteSpace(m?.SelectedConnectionString))
-                        {
-                            this.Model.SelectedConnectionString = m.SelectedConnectionString;
-                            this.Model.SelectedConnection = m.SelectedConnection;
-                            if (this.Model.SelectedConnection is FileSystemConnection con && !string.IsNullOrWhiteSpace(con.FileSystemPath))
+                            // exclude unwanted files
+                            if (!filePath.Contains(".pdb") && !filePath.Contains(".nupkg") && !filePath.Contains(".vshost."))
                             {
-                                this.FilePath = con.FileSystemPath.Replace($"\\{this.Model.AppId}_files\\Releases", "");
-                            }
-                            else if (this.Model.SelectedConnection is AmazonS3Connection s3con)
-                            {
-                                if (string.IsNullOrWhiteSpace(s3con.FileSystemPath))
-                                {
-                                    this.FilePath = this.ProjectFilePath;
-                                }
-                                else
-                                {
-                                    this.FilePath = s3con.FileSystemPath.Replace($"\\{this.Model.AppId}_files\\Releases", "");
-                                }
+                                this.Model.AddFile(filePath, targetItem);
                             }
                         }
-                    }
 
-                    // If not able to read settings default to FileSystem settings
-                    if (string.IsNullOrWhiteSpace(this.Model.SelectedConnectionString))
-                    {
-                        this.FilePath = this.ProjectFilePath;
-                        this.Model.SelectedConnectionString = "File System";
-                        if (!string.IsNullOrWhiteSpace(this.ProjectFilePath) && !string.IsNullOrWhiteSpace(this.Model.AppId) && this.Model.SelectedConnection is FileSystemConnection con)
+                        this.Model.PackageFiles = AutoSquirrelModel.OrderFileList(this.Model.PackageFiles);
+                        this.ProjectFilePath = Path.GetDirectoryName(x.Project.FileName);
+
+                        var xmldoc = new XmlDocument();
+                        xmldoc.Load(x.Project.FileName);
+                        var mgr = new XmlNamespaceManager(xmldoc.NameTable);
+                        mgr.AddNamespace("x", "http://schemas.microsoft.com/developer/msbuild/2003");
+                        const string msbuild = "//x:";
+                        ////// ApplicationIcon
+                        foreach (XmlNode item in xmldoc.SelectNodes(msbuild + "ApplicationIcon", mgr))
                         {
-                            con.FileSystemPath = Path.Combine(this.FilePath, $"{this.Model.AppId}_files\\Releases");
+                            this.Model.IconFilepath = Path.Combine(this.ProjectFilePath, item.InnerText);
                         }
+
+                        // try to retrieve existing settings
+                        var file = Path.Combine(this.ProjectFilePath, $"{this.Model.AppId}.asproj");
+                        if (File.Exists(file))
+                        {
+                            AutoSquirrelModel m = FileUtility.Deserialize<AutoSquirrelModel>(file);
+                            if (!string.IsNullOrWhiteSpace(m?.SelectedConnectionString))
+                            {
+                                this.Model.SelectedConnectionString = m.SelectedConnectionString;
+                                this.Model.SelectedConnection = m.SelectedConnection;
+                                this.FilePath = m.CurrentFilePath;
+                                if (this.Model.SelectedConnection is FileSystemConnection fscon)
+                                {
+                                    if (string.IsNullOrWhiteSpace(fscon.FileSystemPath))
+                                    {
+                                        fscon.FileSystemPath = Path.Combine(this.FilePath, $"{this.Model.AppId}_files\\Releases");
+                                    }
+                                }
+                                else if (this.Model.SelectedConnection is AmazonS3Connection s3con)
+                                {
+                                    if (string.IsNullOrWhiteSpace(s3con.FileSystemPath))
+                                    {
+                                        s3con.FileSystemPath = Path.Combine(this.FilePath, $"{this.Model.AppId}_files\\Releases");
+                                    }
+                                }
+                            }
+                        }
+
+                        // If not able to read settings default to FileSystem settings
+                        if (string.IsNullOrWhiteSpace(this.Model.SelectedConnectionString))
+                        {
+                            this.FilePath = this.ProjectFilePath;
+                            this.Model.SelectedConnectionString = "File System";
+                            if (!string.IsNullOrWhiteSpace(this.ProjectFilePath) && !string.IsNullOrWhiteSpace(this.Model.AppId) && this.Model.SelectedConnection is FileSystemConnection con)
+                            {
+                                con.FileSystemPath = Path.Combine(this.FilePath, $"{this.Model.AppId}_files\\Releases");
+                            }
+                        }
+                        if (string.IsNullOrWhiteSpace(this.FilePath) && this.Model.SelectedConnection is FileSystemConnection fscon2)
+                        {
+                            this.FilePath = this.ProjectFilePath;
+                            fscon2.FileSystemPath = Path.Combine(this.FilePath, $"{this.Model.AppId}_files\\Releases");
+                        }
+
+                        if (string.IsNullOrWhiteSpace(this.FilePath) && this.Model.SelectedConnection is AmazonS3Connection s3con2)
+                        {
+                            this.FilePath = this.ProjectFilePath;
+                            s3con2.FileSystemPath = Path.Combine(this.FilePath, $"{this.Model.AppId}_files\\Releases");
+                        }
+                        this.Save();
                     }
-                    this.Save();
+                    catch (Exception ex)
+                    {
+                        VSHelper.ProjectIsValid.Value = false;
+                    }
                 });
         }
 
@@ -351,7 +368,7 @@
             if (Directory.Exists(currentPath))
             {
                 dialog.SelectedPath = currentPath;
-                dialog.Description = "Please select a new File Path that does not contain Spaces";
+                dialog.Description = "Please select a new File Path that does not contain Spaces.\r A new folder will be created here containing the Squirrel build for this project";
                 dialog.ShowNewFolderButton = true;
             }
 
