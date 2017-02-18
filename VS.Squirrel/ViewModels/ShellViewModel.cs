@@ -37,20 +37,48 @@
         /// </summary>
         public ShellViewModel()
         {
-            SquirrelPackagerPackage._dte.Events.BuildEvents.OnBuildDone += this.BuildEvents_OnBuildDone;
+            var lastproject = string.Empty;
+            SquirrelPackagerPackage._dte.Events.BuildEvents.OnBuildDone += (Scope, Action) =>
+            {
+                try
+                {
+                    if (VSHelper.SelectedProject.Value != null)
+                    {
+                        lastproject = string.Empty;
+                        this.Model = new AutoSquirrelModel();
+                        VSHelper.SetProjectFiles(VSHelper.SelectedProject.Value);
+                    }
+                }
+                catch (Exception ex)
+                {
+                }
+            };
 
-            VSHelper.ProjectFiles.Where(x => x != null)
-                .CombineLatest(VSHelper.SelectedProject.Where(x => x != null),
-                (f, p) => new { Files = f, Project = p })
+            VSHelper.ProjectFiles.Where(x => x.Value != null && x.Key != null)
+                .Select(x => new { Files = x.Value, Project = x.Key })
                 .Throttle(TimeSpan.FromMilliseconds(500))
                 .ObserveOn(DispatcherScheduler.Current)
                 .Subscribe(x =>
                 {
                     try
                     {
-                        var d = x.Project.IsDirty;
+                        var IsSquirrelProject = x.Files.Any(s => s.Contains("Squirrel.dll"));
+                        if (!IsSquirrelProject)
+                        {
+                            // Project is not using Squirrel
+                            VSHelper.ProjectIsValid.Value = false;
+                            return;
+                        }
+
+                        if (x.Project.FileName == lastproject && this.Model.IsValid)
+                        {
+                            // Nothing has changed just show the data
+                            VSHelper.ProjectIsValid.Value = true;
+                            return;
+                        }
 
                         this.Model = new AutoSquirrelModel();
+
                         ItemLink targetItem = null;
                         foreach (var filePath in x.Files)
                         {
@@ -63,10 +91,12 @@
 
                         if (string.IsNullOrWhiteSpace(this.Model.MainExePath))
                         {
+                            // Project does not contain an exe at the root level
                             this.Model = new AutoSquirrelModel();
                             VSHelper.ProjectIsValid.Value = false;
                             return;
                         }
+                        lastproject = x.Project.FileName;
 
                         this.Model.PackageFiles = AutoSquirrelModel.OrderFileList(this.Model.PackageFiles);
                         this.ProjectFilePath = Path.GetDirectoryName(x.Project.FileName);
@@ -131,6 +161,7 @@
                             s3con2.FileSystemPath = Path.Combine(this.FilePath, $"{this.Model.AppId}_files\\Releases");
                         }
                         this.Save();
+                        VSHelper.ProjectIsValid.Value = this.Model.IsValid;
                     }
                     catch (Exception)
                     {
@@ -520,8 +551,6 @@
             this.CurrentPackageCreationStage = message;
         }
 
-        private void BuildEvents_OnBuildDone(EnvDTE.vsBuildScope Scope, EnvDTE.vsBuildAction Action) => VSHelper.SetProjectFiles(VSHelper.SelectedProject.Value);
-
         /// <summary>
         /// Called on package created. Start the upload.
         /// </summary>
@@ -585,11 +614,12 @@
                     { "l=|shortcut-locations=", "Comma-separated string of shortcut locations, e.g. 'Desktop,StartMenu'", v => shortcutArgs = v},
                     { "no-msi", "Don't generate an MSI package", v => noMsi = true},
             */
-            var cmd = $@" -releasify {nugetPackagePath} -releaseDir {squirrelOutputPath}";
+            var cmd = $@" -releasify {nugetPackagePath} -releaseDir {squirrelOutputPath} -l 'Desktop'";
 
             if (File.Exists(this.Model.IconFilepath))
             {
-                cmd += $@" -i '{this.Model.IconFilepath}'";
+                cmd += $@" -i {this.Model.IconFilepath}";
+                cmd += $@" -setupIcon {this.Model.IconFilepath}";
             }
 
             var squirrel = Path.Combine(Path.GetDirectoryName(typeof(ShellViewModel).Assembly.Location), @"tools\Squirrel-Windows.exe");

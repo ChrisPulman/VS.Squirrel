@@ -9,8 +9,8 @@
 - [x] Add the ability to Build Full Releases
 - [x] Add the ability to Build Update Releases
 - [x] Test with multiple projects
-- [x] Gate the visibility of the toolwindow to Project selection only
-- [ ] Detect projects that have no exe in build folder
+- [x] Gate the visibility of the toolwindow to a Squirrel Project selection only
+- [x] Detect projects that have no exe in build folder
 - [ ] Check that the project has been saved
 - [ ] Check that the project has been built
 ---

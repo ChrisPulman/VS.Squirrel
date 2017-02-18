@@ -43,7 +43,7 @@ namespace AutoSquirrel.Services.Helpers
         /// Gets the project files.
         /// </summary>
         /// <value>The project files.</value>
-        public static ReactiveProperty<IEnumerable<string>> ProjectFiles { get; } = new ReactiveProperty<IEnumerable<string>>();
+        public static ReactiveProperty<KeyValuePair<Project, IEnumerable<string>>> ProjectFiles { get; } = new ReactiveProperty<KeyValuePair<Project, IEnumerable<string>>>();
 
         /// <summary>
         /// Gets the project is valid.
@@ -109,14 +109,20 @@ namespace AutoSquirrel.Services.Helpers
         /// <summary>
         /// Gets the active project.
         /// </summary>
+        /// <param name="onlyIfProjectSelected">if set to <c>true</c> [only if project selected].</param>
         /// <returns></returns>
-        public static Project GetActiveProject()
+        public static Project GetActiveProject(bool onlyIfProjectSelected = true)
         {
             try
             {
                 if (_dte.ActiveSolutionProjects is Array activeSolutionProjects && activeSolutionProjects.Length > 0)
                 {
                     return activeSolutionProjects.GetValue(0) as Project;
+                }
+
+                if (onlyIfProjectSelected)
+                {
+                    return null;
                 }
 
                 Document doc = _dte.ActiveDocument;
@@ -523,10 +529,9 @@ namespace AutoSquirrel.Services.Helpers
 
             if (VSHelper.BuildPath.Value != string.Empty)
             {
-                VSHelper.ProjectFiles.Value = Directory.EnumerateFileSystemEntries(VSHelper.BuildPath.Value);
+                VSHelper.ProjectFiles.Value = new KeyValuePair<Project, IEnumerable<string>>(project, Directory.EnumerateFileSystemEntries(VSHelper.BuildPath.Value));
             }
             VSHelper.SelectedProject.Value = project;
-            VSHelper.ProjectIsValid.Value = true;
         }
 
         private static IEnumerable<Project> GetChildProjects(Project parent)

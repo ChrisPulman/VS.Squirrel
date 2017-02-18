@@ -1002,7 +1002,7 @@
                 RuleFor(c => c.Title).NotEmpty();
                 RuleFor(c => c.Description).NotEmpty();
                 RuleFor(c => c.Version).NotEmpty();
-                RuleFor(c => c.PackageFiles).NotEmpty();
+                RuleFor(c => c.PackageFiles).Must(x => x.Count > 1);
                 RuleFor(c => c.Authors).NotEmpty();
                 RuleFor(c => c.SelectedConnectionString).NotEmpty();
             }
