@@ -119,23 +119,27 @@
                         if (File.Exists(file))
                         {
                             AutoSquirrelModel m = FileUtility.Deserialize<AutoSquirrelModel>(file);
-                            if (!string.IsNullOrWhiteSpace(m?.SelectedConnectionString))
+                            if (m != null)
                             {
-                                this.Model.SelectedConnectionString = m.SelectedConnectionString;
-                                this.Model.SelectedConnection = m.SelectedConnection;
-                                this.FilePath = m.CurrentFilePath;
-                                if (this.Model.SelectedConnection is FileSystemConnection fscon)
+                                this.Model.IconFilepath = m.IconFilepath;
+                                if (!string.IsNullOrWhiteSpace(m?.SelectedConnectionString))
                                 {
-                                    if (string.IsNullOrWhiteSpace(fscon.FileSystemPath))
+                                    this.Model.SelectedConnectionString = m.SelectedConnectionString;
+                                    this.Model.SelectedConnection = m.SelectedConnection;
+                                    this.FilePath = m.CurrentFilePath;
+                                    if (this.Model.SelectedConnection is FileSystemConnection fscon)
                                     {
-                                        fscon.FileSystemPath = Path.Combine(this.FilePath, $"{this.Model.AppId}_files\\Releases");
+                                        if (string.IsNullOrWhiteSpace(fscon.FileSystemPath))
+                                        {
+                                            fscon.FileSystemPath = Path.Combine(this.FilePath, $"{this.Model.AppId}_files\\Releases");
+                                        }
                                     }
-                                }
-                                else if (this.Model.SelectedConnection is AmazonS3Connection s3con)
-                                {
-                                    if (string.IsNullOrWhiteSpace(s3con.FileSystemPath))
+                                    else if (this.Model.SelectedConnection is AmazonS3Connection s3con)
                                     {
-                                        s3con.FileSystemPath = Path.Combine(this.FilePath, $"{this.Model.AppId}_files\\Releases");
+                                        if (string.IsNullOrWhiteSpace(s3con.FileSystemPath))
+                                        {
+                                            s3con.FileSystemPath = Path.Combine(this.FilePath, $"{this.Model.AppId}_files\\Releases");
+                                        }
                                     }
                                 }
                             }

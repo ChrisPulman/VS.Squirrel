@@ -345,22 +345,14 @@
                                         BorderThickness="{TemplateBinding BorderThickness}"
                                         SnapsToDevicePixels="true">
                                         <Grid>
-                                            <TextBlock
-                                                HorizontalAlignment="Center"
-                                                VerticalAlignment="Top"
-                                                FontSize="50"
-                                                Foreground="#607D8B"
-                                                Opacity=".5"
-                                                Text="Squirrel Packager" />
-
                                             <Image
                                                 MaxWidth="256"
                                                 MaxHeight="256"
-                                                Margin="0,60,0,0"
-                                                HorizontalAlignment="Center"
-                                                VerticalAlignment="Center"
+                                                Margin="0,20,40,0"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Top"
                                                 Opacity=".4"
-                                                Source="/AutoSquirrel;component/Images/package_256.png"
+                                                Source="../Images/Squirrel-Logo.png"
                                                 Stretch="Uniform" />
 
                                             <ScrollViewer Padding="{TemplateBinding Padding}" Focusable="false">

@@ -111,6 +111,9 @@
       <Generator>VsixManifestGenerator</Generator>
       <LastGenOutput>source.extension.resx</LastGenOutput>
     </None>
+    <Resource Include="Images\Squirrel-Logo.png" />
+    <Resource Include="Images\SquirrelPackagerPackage.bmp" />
+    <Resource Include="Images\SquirrelPackagerPackage.png" />
     <Content Include="source.extension.ico">
       <DependentUpon>source.extension.vsixmanifest</DependentUpon>
     </Content>
@@ -152,12 +155,10 @@
     <Resource Include="Images\status_lock_yellow_16.png" />
     <Resource Include="Images\status_unlocked_16.png" />
     <Resource Include="Images\upload_32.png" />
-    <Content Include="index.html" />
     <Content Include="NuGet.Squirrel.dll" />
-    <Content Include="Images\SquirrelPackagerPackage.ico">
+    <Resource Include="Images\SquirrelPackagerPackage.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
+    </Resource>
     <Resource Include="Images\SquirrelPackagerCommand.png" />
     <Content Include="Splat.dll" />
     <Content Include="Squirrel.dll" />
@@ -229,6 +230,7 @@
       <ResourceName>Menus.ctmenu</ResourceName>
       <Generator>VsctGenerator</Generator>
       <LastGenOutput>SquirrelPackagerPackage1.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </VSCTCompile>
     <Content Include="stylesheet.css" />
   </ItemGroup>
