@@ -19,13 +19,25 @@ namespace AutoSquirrel.Services.Helpers
     /// </summary>
     public static class VSHelper
     {
-        private static DTE2 _dte = SquirrelPackagerPackage._dte;
+        private static DTE2 _dte = SquirrelPackagerPackage.DesignTimeEnviroment;
         private static string lsolDir;
         private static string lsolFile;
         private static string lsolUserOpts;
         private static string solDir;
         private static string solFile;
         private static string solUserOpts;
+
+        static VSHelper()
+        {
+            VSHelper.OptionsFile = Path.Combine(Path.GetDirectoryName(typeof(ShellViewModel).Assembly.Location), "VS.Squirrel.Settings.asproj");
+            if (!File.Exists(VSHelper.OptionsFile))
+            {
+                VSHelper.Options = new VSSqirrelOptions { UseDebug = false, UseRelease = true, ShowUI = true };
+                FileUtility.SerializeToFile(VSHelper.OptionsFile, VSHelper.Options);
+            }
+
+            VSHelper.Options = FileUtility.Deserialize<VSSqirrelOptions>(VSHelper.OptionsFile) ?? new VSSqirrelOptions { UseDebug = false, UseRelease = true, ShowUI = true };
+        }
 
         /// <summary>
         /// Gets the build path.
@@ -38,6 +50,18 @@ namespace AutoSquirrel.Services.Helpers
         /// </summary>
         /// <value>The caption.</value>
         public static ReactiveProperty<string> Caption { get; } = new ReactiveProperty<string>("Squirrel Packager");
+
+        /// <summary>
+        /// Gets or sets the options.
+        /// </summary>
+        /// <value>The options.</value>
+        public static IVSSqirrelOptions Options { get; set; }
+
+        /// <summary>
+        /// Gets the options file.
+        /// </summary>
+        /// <value>The options file.</value>
+        public static string OptionsFile { get; }
 
         /// <summary>
         /// Gets the project files.
@@ -405,25 +429,29 @@ namespace AutoSquirrel.Services.Helpers
         /// </summary>
         /// <param name="pHierNew">The p hier new.</param>
         /// <param name="itemidNew">The itemid new.</param>
-        public static void SetCurrentProject(IVsHierarchy pHierNew, uint itemidNew)
+        public static void SetCurrentProject(IVsHierarchy pHierNew, uint itemidNew, bool getProjectForCurrentItem = false)
         {
-            try
+            if (getProjectForCurrentItem)
             {
-                // try to get the active project first
-                Project activeProject = GetActiveProject();
-
-                if (activeProject != null)
+                try
                 {
-                    VSHelper.SetProjectFiles(activeProject);
-                    return;
+                    // get the active project for the current item
+                    Project activeProject = GetActiveProject();
+
+                    if (activeProject != null)
+                    {
+                        VSHelper.SetProjectFiles(activeProject);
+                        return;
+                    }
                 }
-            }
-            catch
-            {
+                catch
+                {
+                }
             }
 
             if (pHierNew != null)
             {
+                // Only returns if the item is a project
                 try
                 {
                     ErrorHandler.ThrowOnFailure(pHierNew.GetProperty(itemidNew, (int)__VSHPROPID.VSHPROPID_ExtObject, out var selectedObject));
@@ -493,18 +521,22 @@ namespace AutoSquirrel.Services.Helpers
                 return;
             }
 
-            //do work
+            //find our settings from the project file
+            ConfigurationManager man = project.ConfigurationManager;
+
+            ////// Get Configuration and check that our settings want us to execute
+            var config = man.ActiveConfiguration.ConfigurationName;
+            if (VSHelper.Options == null || !VSHelper.Options.ShowUI || (!VSHelper.Options.UseRelease && config.Contains("Release")) || (!VSHelper.Options.UseDebug && config.Contains("Debug")))
+            {
+                return;
+            }
+
             var xmldoc = new XmlDocument();
             xmldoc.Load(project.FileName);
 
             var mgr = new XmlNamespaceManager(xmldoc.NameTable);
             mgr.AddNamespace("x", "http://schemas.microsoft.com/developer/msbuild/2003");
             const string msbuild = "//x:";
-
-            ConfigurationManager man = project.ConfigurationManager;
-
-            ////// Configuration
-            var config = man.ActiveConfiguration.ConfigurationName;
 
             ////// Platform
             var platform = man.ActiveConfiguration.PlatformName.Replace(" ", "");
@@ -516,12 +548,9 @@ namespace AutoSquirrel.Services.Helpers
                 {
                     foreach (XmlNode test in item.ChildNodes)
                     {
-                        if (test.Name == "OutputPath")
+                        if (test.Name == "OutputPath" && item.Attributes.GetNamedItem("Condition").Value.Contains($"{config}|{platform}"))
                         {
-                            if (item.Attributes.GetNamedItem("Condition").Value.Contains($"{config}|{platform}"))
-                            {
-                                VSHelper.BuildPath.Value = Path.Combine(directoryName, test.InnerText);
-                            }
+                            VSHelper.BuildPath.Value = Path.Combine(directoryName, test.InnerText);
                         }
                     }
                 }

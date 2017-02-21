@@ -29,10 +29,8 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <!--<TextBlock Text="Connection Name : " Grid.Row="0" Grid.Column="0" />
-            <TextBox Text="{Binding Path=ConnectionName,ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="1" />-->
-
                     <TextBlock
                         Grid.Row="1"
                         Grid.Column="0"
@@ -92,6 +90,15 @@
                         Grid.Row="7"
                         Grid.Column="1"
                         Text="Copy this link for Setup.Exe location" />
+                    <TextBlock
+                        Grid.Row="8"
+                        Grid.Column="0"
+                        Text="Filesytem Path : " />
+                    <TextBox
+                        Grid.Row="8"
+                        Grid.Column="1"
+                        IsReadOnly="True"
+                        Text="{Binding Path=FileSystemPath, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
                 </Grid>
             </DataTemplate>
             <DataTemplate DataType="{x:Type local:FileSystemConnection}">

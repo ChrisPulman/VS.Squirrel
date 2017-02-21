@@ -11,6 +11,7 @@
 - [x] Test with multiple projects
 - [x] Gate the visibility of the toolwindow to a Squirrel Project selection only
 - [x] Detect projects that have no exe in build folder
+- [x] Add Settings
 - [ ] Check that the project has been saved
 - [ ] Check that the project has been built
 ---

@@ -30,6 +30,7 @@ namespace AutoSquirrel
             this.PackageTreeview.SelectedItemChanged += this.PackageTreeview_SelectedItemChanged;
             this.PublishPackageComplete.Click += this.PublishPackageComplete_Click;
             this.PublishPackageOnlyUpdate.Click += this.PublishPackageOnlyUpdate_Click;
+            this.WebConnection.IsVisibleChanged += this.WebConnection_IsVisibleChanged;
         }
 
         private static TreeView VisualUpwardSearch(DependencyObject source)
@@ -63,5 +64,13 @@ namespace AutoSquirrel
         private void PublishPackageComplete_Click(object sender, RoutedEventArgs e) => ((ShellViewModel)this.DataContext).PublishPackageComplete();
 
         private void PublishPackageOnlyUpdate_Click(object sender, RoutedEventArgs e) => ((ShellViewModel)this.DataContext).PublishPackageOnlyUpdate();
+
+        private void WebConnection_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (!(bool)e.NewValue)
+            {
+                ((ShellViewModel)this.DataContext).Save();
+            }
+        }
     }
 }

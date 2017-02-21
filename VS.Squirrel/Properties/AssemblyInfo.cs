@@ -10,5 +10,13 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
-[assembly: AssemblyVersion("0.0.13")]
-[assembly: AssemblyFileVersion("0.0.13")]
+[assembly: AssemblyVersion("0.0.14")]
+[assembly: AssemblyFileVersion("0.0.14")]
+
+namespace System
+{
+    internal static class AssemblyVersionInformation
+    {
+        internal const string Version = "0.0.14";
+    }
+}

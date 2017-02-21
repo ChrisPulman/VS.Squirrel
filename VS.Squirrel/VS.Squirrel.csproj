@@ -79,6 +79,14 @@
     <Compile Include="Services\Preference.cs" />
     <Compile Include="Services\PropertyChangedBaseValidable.cs" />
     <Compile Include="Services\Helpers\IconHelper\Shell32.cs" />
+    <Compile Include="Settings\IVSSqirrelOptions.cs" />
+    <Compile Include="Settings\OptionsControl.xaml.cs">
+      <DependentUpon>OptionsControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Settings\OptionsPage.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Settings\VSSqirrelOptions.cs" />
     <Compile Include="source.extension.cs">
       <DependentUpon>source.extension.vsixmanifest</DependentUpon>
     </Compile>
@@ -236,6 +244,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="AppCustomStyle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Settings\OptionsControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

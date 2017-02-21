@@ -85,19 +85,32 @@ namespace AutoSquirrel
             monitorBuild.AdviseUpdateSolutionEvents(this, out this.buildCookie);
         }
 
-        private void Update(IVsHierarchy pIVsHierarchy, uint itemidNew) => System.Threading.Tasks.Task.Run(() => VSHelper.SetCurrentProject(pIVsHierarchy, itemidNew)).ConfigureAwait(false);
+        private void Update(IVsHierarchy pIVsHierarchy, uint itemidNew) =>
+            System.Threading.Tasks.Task.Run(() =>
+                {
+                    if (VSHelper.Options != null && VSHelper.Options.ShowUI && (VSHelper.Options.UseDebug || VSHelper.Options.UseRelease))
+                    {
+                        VSHelper.SetCurrentProject(pIVsHierarchy, itemidNew);
+                    }
+                    else
+                    {
+                        VSHelper.ProjectIsValid.Value = false;
+                    }
+                }).ConfigureAwait(false);
 
-        private void Update(IVsHierarchy pIVsHierarchy) => System.Threading.Tasks.Task.Run(() =>
-                                                         {
-                                                             EnvDTE.Project pro = VSHelper.GetDTEProject(pIVsHierarchy);
-                                                             if (pro != null)
-                                                             {
-                                                                 VSHelper.SetProjectFiles(pro);
-                                                             }
-                                                             else
-                                                             {
-                                                                 VSHelper.ProjectIsValid.Value = false;
-                                                             }
-                                                         }).ConfigureAwait(false);
+        private void Update(IVsHierarchy pIVsHierarchy) =>
+            System.Threading.Tasks.Task.Run(() =>
+                {
+                    if (VSHelper.Options != null && VSHelper.Options.ShowUI && (VSHelper.Options.UseDebug || VSHelper.Options.UseRelease))
+                    {
+                        EnvDTE.Project pro = VSHelper.GetDTEProject(pIVsHierarchy);
+                        if (pro != null)
+                        {
+                            VSHelper.SetProjectFiles(pro);
+                            return;
+                        }
+                    }
+                    VSHelper.ProjectIsValid.Value = false;
+                }).ConfigureAwait(false);
     }
 }

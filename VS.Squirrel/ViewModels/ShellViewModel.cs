@@ -39,11 +39,14 @@
         {
             var lastproject = string.Empty;
             var errorMessageShown = false;
-            SquirrelPackagerPackage._dte.Events.BuildEvents.OnBuildDone += (Scope, Action) =>
+            SquirrelPackagerPackage.DesignTimeEnviroment.Events.BuildEvents.OnBuildDone += (Scope, Action) =>
             {
                 try
                 {
-                    if (VSHelper.SelectedProject.Value != null)
+                    if (VSHelper.Options != null
+                    && VSHelper.SelectedProject.Value != null
+                    && VSHelper.Options.ShowUI
+                    && (VSHelper.Options.UseDebug || VSHelper.Options.UseRelease))
                     {
                         errorMessageShown = false;
                         lastproject = string.Empty;
@@ -57,8 +60,8 @@
             };
 
             VSHelper.ProjectFiles.Where(x => x.Value != null && x.Key != null)
-                .Select(x => new { Files = x.Value, Project = x.Key })
                 .Throttle(TimeSpan.FromMilliseconds(500))
+                .Select(x => new { Files = x.Value, Project = x.Key })
                 .ObserveOn(DispatcherScheduler.Current)
                 .Subscribe(x =>
                 {
