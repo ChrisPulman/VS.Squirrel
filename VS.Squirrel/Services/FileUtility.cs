@@ -29,7 +29,7 @@ namespace AutoSquirrel
                     {
                         TypeNameHandling = TypeNameHandling.All
                     };
-                    if (typeof(TRet) == typeof(AutoSquirrelModel))
+                    if (typeof(TRet) == typeof(AutoSquirrelModel) || typeof(TRet) == typeof(VSSqirrelOptions))
                     {
                         serializer.Binder = new AutoSquirrelBindAll();
                     }
@@ -84,6 +84,9 @@ namespace AutoSquirrel
                 {
                     case "AutoSquirrel.WebConnectionBase":
                         return typeof(WebConnectionBase);
+
+                    case "AutoSquirrel.VSSqirrelOptions":
+                        return typeof(VSSqirrelOptions);
 
                     case "AutoSquirrel.AutoSquirrelModel":
                         return typeof(AutoSquirrelModel);
