@@ -7,10 +7,10 @@ using Microsoft.VisualStudio;
 using System.Runtime.InteropServices;
 using System.IO;
 using System.Xml;
-using Reactive.Bindings;
 using EnvDTE80;
 using System.Diagnostics;
 using System.Linq;
+using Reactive.Bindings;
 
 namespace AutoSquirrel.Services.Helpers
 {
@@ -19,7 +19,7 @@ namespace AutoSquirrel.Services.Helpers
     /// </summary>
     public static class VSHelper
     {
-        private static DTE2 _dte = SquirrelPackagerPackage.DesignTimeEnviroment;
+        private static DTE2 _dte = AutoSquirrelPackage.DesignTimeEnviroment;
         private static string lsolDir;
         private static string lsolFile;
         private static string lsolUserOpts;
@@ -30,8 +30,7 @@ namespace AutoSquirrel.Services.Helpers
         static VSHelper()
         {
             VSHelper.OptionsFile = Path.Combine(Path.GetDirectoryName(typeof(ShellViewModel).Assembly.Location), "VS.Squirrel.Settings.asproj");
-            if (!File.Exists(VSHelper.OptionsFile))
-            {
+            if (!File.Exists(VSHelper.OptionsFile)) {
                 VSHelper.Options = new VSSqirrelOptions { UseDebug = false, UseRelease = true, ShowUI = true };
                 FileUtility.SerializeToFile(VSHelper.OptionsFile, VSHelper.Options);
             }
@@ -43,7 +42,7 @@ namespace AutoSquirrel.Services.Helpers
         /// Gets the build path.
         /// </summary>
         /// <value>The build path.</value>
-        public static ReactiveProperty<string> BuildPath { get; } = new ReactiveProperty<string>();
+        public static string BuildPath { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets the caption.
@@ -91,19 +90,17 @@ namespace AutoSquirrel.Services.Helpers
         public static ProjectItem AddFileToProject(this Project project, FileInfo file, string itemType = null)
 
         {
-            if (project.IsKind(ProjectTypes.ASPNET_5, ProjectTypes.SSDT))
-            {
+            if (project.IsKind(ProjectTypes.ASPNET_5, ProjectTypes.SSDT)) {
                 return _dte.Solution.FindProjectItem(file.FullName);
             }
 
             var root = project.GetRootFolder();
 
-            if (string.IsNullOrEmpty(root) || !file.FullName.StartsWith(root, StringComparison.OrdinalIgnoreCase))
-            {
+            if (string.IsNullOrEmpty(root) || !file.FullName.StartsWith(root, StringComparison.OrdinalIgnoreCase)) {
                 return null;
             }
 
-            ProjectItem item = project.ProjectItems.AddFromFile(file.FullName);
+            var item = project.ProjectItems.AddFromFile(file.FullName);
 
             item.SetItemType(itemType);
 
@@ -118,8 +115,7 @@ namespace AutoSquirrel.Services.Helpers
         /// <returns></returns>
         public static string CleanNameSpace(string ns, bool stripPeriods = true)
         {
-            if (stripPeriods)
-            {
+            if (stripPeriods) {
                 ns = ns.Replace(".", "");
             }
 
@@ -137,33 +133,25 @@ namespace AutoSquirrel.Services.Helpers
         /// <returns></returns>
         public static Project GetActiveProject(bool onlyIfProjectSelected = true)
         {
-            try
-            {
-                if (_dte.ActiveSolutionProjects is Array activeSolutionProjects && activeSolutionProjects.Length > 0)
-                {
+            try {
+                if (_dte.ActiveSolutionProjects is Array activeSolutionProjects && activeSolutionProjects.Length > 0) {
                     return activeSolutionProjects.GetValue(0) as Project;
                 }
 
-                if (onlyIfProjectSelected)
-                {
+                if (onlyIfProjectSelected) {
                     return null;
                 }
 
-                Document doc = _dte.ActiveDocument;
+                var doc = _dte.ActiveDocument;
 
-                if (doc != null && !string.IsNullOrEmpty(doc.FullName))
+                if (doc != null && !string.IsNullOrEmpty(doc.FullName)) {
+                    var item = _dte.Solution?.FindProjectItem(doc.FullName);
 
-                {
-                    ProjectItem item = _dte.Solution?.FindProjectItem(doc.FullName);
-
-                    if (item != null)
-                    {
+                    if (item != null) {
                         return item.ContainingProject;
                     }
                 }
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 Trace.WriteLine("Error getting the active project" + ex);
             }
 
@@ -177,8 +165,7 @@ namespace AutoSquirrel.Services.Helpers
         /// <returns></returns>
         public static Project GetDTEProject(IVsHierarchy hierarchy)
         {
-            if (hierarchy == null)
-            {
+            if (hierarchy == null) {
                 return null;
             }
 
@@ -193,11 +180,9 @@ namespace AutoSquirrel.Services.Helpers
         /// <returns></returns>
         public static IEnumerable<Project> GetProjects(IVsSolution solution)
         {
-            foreach (IVsHierarchy hier in GetProjectsInSolution(solution))
-            {
-                Project project = GetDTEProject(hier);
-                if (project != null)
-                {
+            foreach (var hier in GetProjectsInSolution(solution)) {
+                var project = GetDTEProject(hier);
+                if (project != null) {
                     yield return project;
                 }
             }
@@ -218,23 +203,19 @@ namespace AutoSquirrel.Services.Helpers
         /// <returns></returns>
         public static IEnumerable<IVsHierarchy> GetProjectsInSolution(IVsSolution solution, __VSENUMPROJFLAGS flags)
         {
-            if (solution == null)
-            {
+            if (solution == null) {
                 yield break;
             }
 
             Guid guid = Guid.Empty;
             solution.GetProjectEnum((uint)flags, ref guid, out var enumHierarchies);
-            if (enumHierarchies == null)
-            {
+            if (enumHierarchies == null) {
                 yield break;
             }
 
             IVsHierarchy[] hierarchy = new IVsHierarchy[1];
-            while (enumHierarchies.Next(1, hierarchy, out uint fetched) == VSConstants.S_OK && fetched == 1)
-            {
-                if (hierarchy.Length > 0 && hierarchy[0] != null)
-                {
+            while (enumHierarchies.Next(1, hierarchy, out uint fetched) == VSConstants.S_OK && fetched == 1) {
+                if (hierarchy.Length > 0 && hierarchy[0] != null) {
                     yield return hierarchy[0];
                 }
             }
@@ -247,55 +228,41 @@ namespace AutoSquirrel.Services.Helpers
         /// <returns></returns>
         public static string GetRootFolder(this Project project)
         {
-            if (project == null)
-            {
+            if (project == null) {
                 return null;
             }
 
-            if (project.IsKind(ProjectKinds.vsProjectKindSolutionFolder))
-            {
+            if (project.IsKind(ProjectKinds.vsProjectKindSolutionFolder)) {
                 return Path.GetDirectoryName(_dte.Solution.FullName);
             }
 
-            if (string.IsNullOrEmpty(project.FullName))
-            {
+            if (string.IsNullOrEmpty(project.FullName)) {
                 return null;
             }
 
             string fullPath;
 
-            try
-            {
+            try {
                 fullPath = project.Properties.Item("FullPath").Value as string;
-            }
-            catch (ArgumentException)
-
-            {
-                try
-                {
+            } catch (ArgumentException) {
+                try {
                     // MFC projects don't have FullPath, and there seems to be no way to query existence
                     fullPath = project.Properties.Item("ProjectDirectory").Value as string;
-                }
-                catch (ArgumentException)
-
-                {
+                } catch (ArgumentException) {
                     // Installer projects have a ProjectPath.
                     fullPath = project.Properties.Item("ProjectPath").Value as string;
                 }
             }
 
-            if (string.IsNullOrEmpty(fullPath))
-            {
+            if (string.IsNullOrEmpty(fullPath)) {
                 return File.Exists(project.FullName) ? Path.GetDirectoryName(project.FullName) : null;
             }
 
-            if (Directory.Exists(fullPath))
-            {
+            if (Directory.Exists(fullPath)) {
                 return fullPath;
             }
 
-            if (File.Exists(fullPath))
-            {
+            if (File.Exists(fullPath)) {
                 return Path.GetDirectoryName(fullPath);
             }
 
@@ -309,23 +276,19 @@ namespace AutoSquirrel.Services.Helpers
         /// <returns></returns>
         public static string GetRootNamespace(this Project project)
         {
-            if (project == null)
-            {
+            if (project == null) {
                 return null;
             }
 
             var ns = project.Name ?? string.Empty;
 
-            try
-            {
-                Property prop = project.Properties.Item("RootNamespace");
+            try {
+                var prop = project.Properties.Item("RootNamespace");
 
-                if (prop?.Value != null && !string.IsNullOrEmpty(prop.Value.ToString()))
-                {
+                if (prop?.Value != null && !string.IsNullOrEmpty(prop.Value.ToString())) {
                     ns = prop.Value.ToString();
                 }
-            }
-            catch { /* Project doesn't have a root namespace */ }
+            } catch { /* Project doesn't have a root namespace */ }
 
             return CleanNameSpace(ns, stripPeriods: false);
         }
@@ -340,22 +303,17 @@ namespace AutoSquirrel.Services.Helpers
 
             var monitorSelection = (IVsMonitorSelection)Package.GetGlobalService(typeof(SVsShellMonitorSelection));
 
-            try
-            {
+            try {
                 monitorSelection.GetCurrentSelection(out IntPtr hierarchyPointer, out var itemId, out IVsMultiItemSelect multiItemSelect, out IntPtr selectionContainerPointer);
 
-                if (Marshal.GetTypedObjectForIUnknown(hierarchyPointer, typeof(IVsHierarchy)) is IVsHierarchy selectedHierarchy)
-
-                {
+                if (Marshal.GetTypedObjectForIUnknown(hierarchyPointer, typeof(IVsHierarchy)) is IVsHierarchy selectedHierarchy) {
                     ErrorHandler.ThrowOnFailure(selectedHierarchy.GetProperty(itemId, (int)__VSHPROPID.VSHPROPID_ExtObject, out selectedObject));
                 }
 
                 Marshal.Release(hierarchyPointer);
 
                 Marshal.Release(selectionContainerPointer);
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 Trace.WriteLine(ex);
             }
 
@@ -370,21 +328,18 @@ namespace AutoSquirrel.Services.Helpers
             // get current solution
             var solution = (IVsSolution)Package.GetGlobalService(typeof(IVsSolution));
             solution.GetSolutionInfo(out solDir, out solFile, out solUserOpts);
-            if (solDir == lsolDir && solFile == lsolFile && solUserOpts == lsolUserOpts)
-            {
+            if (solDir == lsolDir && solFile == lsolFile && solUserOpts == lsolUserOpts) {
                 return;
             }
 
             lsolDir = solDir;
             lsolFile = solFile;
             lsolUserOpts = solUserOpts;
-            foreach (Project project in GetProjects(solution))
-            {
+            foreach (var project in GetProjects(solution)) {
                 var directoryName = Path.GetDirectoryName(project.FileName);
                 var fileName = Path.GetFileName(project.FileName);
 
-                if (directoryName == null || fileName == null)
-                {
+                if (directoryName == null || fileName == null) {
                     return;
                 }
 
@@ -397,8 +352,7 @@ namespace AutoSquirrel.Services.Helpers
                 var mgr = new XmlNamespaceManager(xmldoc.NameTable);
                 mgr.AddNamespace("x", "http://schemas.microsoft.com/developer/msbuild/2003");
 
-                foreach (XmlNode item in xmldoc.SelectNodes("//x:OutputPath", mgr))
-                {
+                foreach (XmlNode item in xmldoc.SelectNodes("//x:OutputPath", mgr)) {
                     var test = item.InnerText;
                 }
             }
@@ -412,11 +366,8 @@ namespace AutoSquirrel.Services.Helpers
         /// <returns><c>true</c> if the specified project is kind; otherwise, <c>false</c>.</returns>
         public static bool IsKind(this Project project, params string[] kindGuids)
         {
-            foreach (var guid in kindGuids)
-
-            {
-                if (project.Kind.Equals(guid, StringComparison.OrdinalIgnoreCase))
-                {
+            foreach (var guid in kindGuids) {
+                if (project.Kind.Equals(guid, StringComparison.OrdinalIgnoreCase)) {
                     return true;
                 }
             }
@@ -431,39 +382,29 @@ namespace AutoSquirrel.Services.Helpers
         /// <param name="itemidNew">The itemid new.</param>
         public static void SetCurrentProject(IVsHierarchy pHierNew, uint itemidNew, bool getProjectForCurrentItem = false)
         {
-            if (getProjectForCurrentItem)
-            {
-                try
-                {
+            if (getProjectForCurrentItem) {
+                try {
                     // get the active project for the current item
-                    Project activeProject = GetActiveProject();
+                    var activeProject = GetActiveProject();
 
-                    if (activeProject != null)
-                    {
+                    if (activeProject != null) {
                         VSHelper.SetProjectFiles(activeProject);
                         return;
                     }
-                }
-                catch
-                {
+                } catch {
                 }
             }
 
-            if (pHierNew != null)
-            {
+            if (pHierNew != null) {
                 // Only returns if the item is a project
-                try
-                {
+                try {
                     ErrorHandler.ThrowOnFailure(pHierNew.GetProperty(itemidNew, (int)__VSHPROPID.VSHPROPID_ExtObject, out var selectedObject));
 
-                    if (selectedObject is Project project)
-                    {
+                    if (selectedObject is Project project) {
                         VSHelper.SetProjectFiles(project);
                         return;
                     }
-                }
-                catch
-                {
+                } catch {
                 }
             }
             VSHelper.ProjectIsValid.Value = false;
@@ -477,26 +418,19 @@ namespace AutoSquirrel.Services.Helpers
         public static void SetItemType(this ProjectItem item, string itemType)
 
         {
-            try
-
-            {
-                if (item == null || item.ContainingProject == null)
-                {
+            try {
+                if (item == null || item.ContainingProject == null) {
                     return;
                 }
 
                 if (string.IsNullOrEmpty(itemType)
                                         || item.ContainingProject.IsKind(ProjectTypes.WEBSITE_PROJECT)
-                                                            || item.ContainingProject.IsKind(ProjectTypes.UNIVERSAL_APP))
-                {
+                                                            || item.ContainingProject.IsKind(ProjectTypes.UNIVERSAL_APP)) {
                     return;
                 }
 
                 item.Properties.Item("ItemType").Value = itemType;
-            }
-            catch (Exception ex)
-
-            {
+            } catch (Exception ex) {
                 Trace.WriteLine(ex);
             }
         }
@@ -507,8 +441,7 @@ namespace AutoSquirrel.Services.Helpers
         /// <param name="project">The project.</param>
         public static void SetProjectFiles(Project project)
         {
-            if (string.IsNullOrWhiteSpace(project.FileName))
-            {
+            if (string.IsNullOrWhiteSpace(project.FileName)) {
                 VSHelper.ProjectIsValid.Value = false;
                 return;
             }
@@ -516,21 +449,19 @@ namespace AutoSquirrel.Services.Helpers
             var directoryName = Path.GetDirectoryName(project.FileName);
             var fileName = Path.GetFileName(project.FileName);
 
-            if (directoryName == null || fileName == null)
-            {
+            if (directoryName == null || fileName == null) {
                 return;
             }
 
             //find our settings from the project file
-            ConfigurationManager man = project.ConfigurationManager;
+            var man = project.ConfigurationManager;
 
             ////// Get Configuration and check that our settings want us to execute
             var config = man.ActiveConfiguration.ConfigurationName;
-            if (VSHelper.Options == null || !VSHelper.Options.ShowUI || (!VSHelper.Options.UseRelease && config.Contains("Release")) || (!VSHelper.Options.UseDebug && config.Contains("Debug")))
-            {
+            if (VSHelper.Options == null || !VSHelper.Options.ShowUI || (!VSHelper.Options.UseRelease && config.Contains("Release")) || (!VSHelper.Options.UseDebug && config.Contains("Debug"))) {
                 return;
             }
-
+            VSHelper.BuildPath = string.Empty;
             var xmldoc = new XmlDocument();
             xmldoc.Load(project.FileName);
 
@@ -540,52 +471,56 @@ namespace AutoSquirrel.Services.Helpers
 
             ////// Platform
             var platform = man.ActiveConfiguration.PlatformName.Replace(" ", "");
-
+            var targetFramework = "";
             ////// PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "
-            foreach (XmlNode item in xmldoc.SelectNodes(msbuild + "PropertyGroup", mgr))
-            {
-                if (item.HasChildNodes)
-                {
-                    foreach (XmlNode test in item.ChildNodes)
-                    {
-                        if (test.Name == "OutputPath" && item.Attributes.GetNamedItem("Condition").Value.Contains($"{config}|{platform}"))
-                        {
-                            VSHelper.BuildPath.Value = Path.Combine(directoryName, test.InnerText);
+            foreach (XmlNode item in xmldoc.SelectNodes(msbuild + "PropertyGroup", mgr)) {
+                if (item.HasChildNodes) {
+                    foreach (XmlNode test in item.ChildNodes) {
+                        if (test.Name == "OutputPath" && item.Attributes.GetNamedItem("Condition").Value.Contains($"{config}|{platform}")) {
+                            VSHelper.BuildPath = Path.Combine(directoryName, test.InnerText);
                         }
                     }
                 }
             }
-
-            if (VSHelper.BuildPath.Value != string.Empty)
-            {
-                VSHelper.ProjectFiles.Value = new KeyValuePair<Project, IEnumerable<string>>(project, Directory.EnumerateFileSystemEntries(VSHelper.BuildPath.Value));
+            if (VSHelper.BuildPath == string.Empty) {
+                foreach (XmlNode item in xmldoc.FirstChild.ChildNodes) {
+                    if (item.HasChildNodes) {
+                        foreach (XmlNode test in item.ChildNodes) {
+                            if (VSHelper.BuildPath == string.Empty && (test.Name == "TargetFramework" || test.Name == "TargetFrameworks")) {
+                                targetFramework = test.InnerText.Replace(";", "");
+                                if (targetFramework.Length > 0) {
+                                    VSHelper.BuildPath = Path.Combine(directoryName, $"bin\\{config}\\{targetFramework}");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (VSHelper.BuildPath != string.Empty) {
+                VSHelper.ProjectFiles.Value = new KeyValuePair<Project, IEnumerable<string>>(project, Directory.EnumerateFileSystemEntries(VSHelper.BuildPath));
             }
             VSHelper.SelectedProject.Value = project;
         }
 
         private static IEnumerable<Project> GetChildProjects(Project parent)
         {
-            try
-            {
+            try {
                 if (!parent.IsKind(ProjectKinds.vsProjectKindSolutionFolder) && parent.Collection == null)  // Unloaded
                 {
                     return Enumerable.Empty<Project>();
                 }
 
-                if (!string.IsNullOrEmpty(parent.FullName))
-                {
+                if (!string.IsNullOrEmpty(parent.FullName)) {
                     return new[] { parent };
                 }
-            }
-            catch (COMException)
-            {
+            } catch (COMException) {
                 return Enumerable.Empty<Project>();
             }
 
             return parent.ProjectItems
-                                    .Cast<ProjectItem>()
-                                        .Where(p => p.SubProject != null)
-                                        .SelectMany(p => GetChildProjects(p.SubProject));
+                .Cast<ProjectItem>()
+                .Where(p => p.SubProject != null)
+                .SelectMany(p => GetChildProjects(p.SubProject));
         }
 
         /// <summary>

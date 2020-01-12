@@ -1,4 +1,4 @@
-namespace AutoSquirrel
+﻿namespace AutoSquirrel
 {
     using System;
     using System.ComponentModel;
@@ -33,13 +33,12 @@ namespace AutoSquirrel
         {
             get
             {
-                ValidationResult __ValidationResults = Validate();
-                if (__ValidationResults == null)
-                {
+                var __ValidationResults = Validate();
+                if (__ValidationResults == null) {
                     return string.Empty;
                 }
 
-                ValidationFailure __ColumnResults = __ValidationResults.Errors.FirstOrDefault(x => string.Compare(x.PropertyName, columnName, true) == 0);
+                var __ColumnResults = __ValidationResults.Errors.FirstOrDefault(x => string.Compare(x.PropertyName, columnName, true) == 0);
                 return __ColumnResults != null ? __ColumnResults.ErrorMessage : string.Empty;
             }
         }
@@ -52,8 +51,7 @@ namespace AutoSquirrel
         public static string GetError(ValidationResult result)
         {
             var __ValidationErrors = new StringBuilder();
-            foreach (ValidationFailure validationFailure in result.Errors)
-            {
+            foreach (var validationFailure in result.Errors) {
                 __ValidationErrors.Append(validationFailure.ErrorMessage);
                 __ValidationErrors.Append(Environment.NewLine);
             }

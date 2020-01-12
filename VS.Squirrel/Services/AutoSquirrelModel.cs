@@ -15,11 +15,12 @@
     using FluentValidation;
     using FluentValidation.Results;
     using System.Reactive.Linq;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Auto Squirrel Model
     /// </summary>
-    /// <seealso cref="AutoSquirrel.PropertyChangedBaseValidable"/>
+    /// <seealso cref="PropertyChangedBaseValidable"/>
     [DataContract]
     public class AutoSquirrelModel : PropertyChangedBaseValidable
     {
@@ -54,14 +55,14 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="AutoSquirrelModel"/> class.
         /// </summary>
-        public AutoSquirrelModel() => this.PackageFiles = new ObservableCollection<ItemLink>();
+        public AutoSquirrelModel() => PackageFiles = new ObservableCollection<ItemLink>();
 
         /// <summary>
         /// Gets the add directory command.
         /// </summary>
         /// <value>The add directory command.</value>
-        public ICommand AddDirectoryCmd => this._addDirectoryCmd ??
-       (this._addDirectoryCmd = new DelegateCommand(this.AddDirectory));
+        public ICommand AddDirectoryCmd => _addDirectoryCmd ??
+       (_addDirectoryCmd = new DelegateCommand(AddDirectory));
 
         /// <summary>
         /// Gets or sets the application identifier.
@@ -70,12 +71,12 @@
         [DataMember]
         public string AppId
         {
-            get => this._appId;
+            get => _appId;
 
             set
             {
-                this._appId = value;
-                NotifyOfPropertyChange(() => this.AppId);
+                _appId = value;
+                NotifyOfPropertyChange(() => AppId);
             }
         }
 
@@ -86,12 +87,12 @@
         [DataMember]
         public string Authors
         {
-            get => this._authors;
+            get => _authors;
 
             set
             {
-                this._authors = value;
-                NotifyOfPropertyChange(() => this.Authors);
+                _authors = value;
+                NotifyOfPropertyChange(() => Authors);
             }
         }
 
@@ -100,7 +101,7 @@
         /// </summary>
         /// <value>The available upload location.</value>
         public List<string> AvailableUploadLocation =>
-            this._availableUploadLocation ?? (this._availableUploadLocation = new List<string>()
+            _availableUploadLocation ?? (_availableUploadLocation = new List<string>()
                     {
                         "Amazon S3",
                         "File System",
@@ -120,12 +121,12 @@
         [DataMember]
         public string Description
         {
-            get => this._description;
+            get => _description;
 
             set
             {
-                this._description = value;
-                NotifyOfPropertyChange(() => this.Description);
+                _description = value;
+                NotifyOfPropertyChange(() => Description);
             }
         }
 
@@ -133,8 +134,8 @@
         /// Gets the edit connection command.
         /// </summary>
         /// <value>The edit connection command.</value>
-        public ICommand EditConnectionCmd => this._editConnectionCmd ??
-       (this._editConnectionCmd = new DelegateCommand(this.EditCurrentConnection));
+        public ICommand EditConnectionCmd => _editConnectionCmd ??
+       (_editConnectionCmd = new DelegateCommand(EditCurrentConnection));
 
         /// <summary>
         /// Gets or sets the icon filepath.
@@ -143,13 +144,13 @@
         [DataMember]
         public string IconFilepath
         {
-            get => this._iconFilepath;
+            get => _iconFilepath;
 
             set
             {
-                this._iconFilepath = value;
-                NotifyOfPropertyChange(() => this.IconFilepath);
-                NotifyOfPropertyChange(() => this.IconSource);
+                _iconFilepath = value;
+                NotifyOfPropertyChange(() => IconFilepath);
+                NotifyOfPropertyChange(() => IconSource);
             }
         }
 
@@ -161,12 +162,9 @@
         {
             get
             {
-                try
-                {
-                    return GetImageFromFilepath(this.IconFilepath);
-                }
-                catch
-                {
+                try {
+                    return GetImageFromFilepath(IconFilepath);
+                } catch {
                     //TODO -  default icon
                     return null;
                 }
@@ -180,12 +178,12 @@
         [DataMember]
         public string MainExePath
         {
-            get => this._mainExePath;
+            get => _mainExePath;
 
             set
             {
-                this._mainExePath = value;
-                NotifyOfPropertyChange(() => this.MainExePath);
+                _mainExePath = value;
+                NotifyOfPropertyChange(() => MainExePath);
             }
         }
 
@@ -196,12 +194,12 @@
         [DataMember]
         public string NupkgOutputPath
         {
-            get => this._nupkgOutputPath;
+            get => _nupkgOutputPath;
 
             set
             {
-                this._nupkgOutputPath = value;
-                NotifyOfPropertyChange(() => this.NupkgOutputPath);
+                _nupkgOutputPath = value;
+                NotifyOfPropertyChange(() => NupkgOutputPath);
             }
         }
 
@@ -212,12 +210,12 @@
         [DataMember]
         public ObservableCollection<ItemLink> PackageFiles
         {
-            get => this._packageFiles;
+            get => _packageFiles;
 
             set
             {
-                this._packageFiles = value;
-                NotifyOfPropertyChange(() => this.PackageFiles);
+                _packageFiles = value;
+                NotifyOfPropertyChange(() => PackageFiles);
             }
         }
 
@@ -225,22 +223,22 @@
         /// Gets the refresh version number.
         /// </summary>
         /// <value>The refresh version number.</value>
-        public ICommand RefreshVersionNumber => this._refreshVersionNumber ??
-               (this._refreshVersionNumber = new DelegateCommand(this.RefreshPackageVersion));
+        public ICommand RefreshVersionNumber => _refreshVersionNumber ??
+               (_refreshVersionNumber = new DelegateCommand(RefreshPackageVersion));
 
         /// <summary>
         /// Gets the remove all items command.
         /// </summary>
         /// <value>The remove all items command.</value>
-        public ICommand RemoveAllItemsCmd => this._removeAllItemsCmd ??
-               (this._removeAllItemsCmd = new DelegateCommand(this.RemoveAllItems));
+        public ICommand RemoveAllItemsCmd => _removeAllItemsCmd ??
+               (_removeAllItemsCmd = new DelegateCommand(RemoveAllItems));
 
         /// <summary>
         /// Gets the remove item command.
         /// </summary>
         /// <value>The remove item command.</value>
-        public ICommand RemoveItemCmd => this._removeItemCmd ??
-       (this._removeItemCmd = new DelegateCommand(this.RemoveItem));
+        public ICommand RemoveItemCmd => _removeItemCmd ??
+       (_removeItemCmd = new DelegateCommand(RemoveItem));
 
         /// <summary>
         /// Gets or sets the selected connection.
@@ -249,12 +247,12 @@
         [DataMember]
         public WebConnectionBase SelectedConnection
         {
-            get => this._selectedConnection;
+            get => _selectedConnection;
 
             set
             {
-                this._selectedConnection = value;
-                NotifyOfPropertyChange(() => this.SelectedConnection);
+                _selectedConnection = value;
+                NotifyOfPropertyChange(() => SelectedConnection);
             }
         }
 
@@ -265,18 +263,17 @@
         [DataMember]
         public string SelectedConnectionString
         {
-            get => this._selectedConnectionString;
+            get => _selectedConnectionString;
 
             set
             {
-                if (this._selectedConnectionString == value)
-                {
+                if (_selectedConnectionString == value) {
                     return;
                 }
 
                 UpdateSelectedConnection(value);
-                this._selectedConnectionString = value;
-                NotifyOfPropertyChange(() => this.SelectedConnectionString);
+                _selectedConnectionString = value;
+                NotifyOfPropertyChange(() => SelectedConnectionString);
             }
         }
 
@@ -286,12 +283,12 @@
         /// <value>The selected item.</value>
         public ItemLink SelectedItem
         {
-            get => this.selectedItem;
+            get => selectedItem;
 
             set
             {
-                this.selectedItem = value;
-                NotifyOfPropertyChange(() => this.SelectedItem);
+                selectedItem = value;
+                NotifyOfPropertyChange(() => SelectedItem);
             }
         }
 
@@ -307,12 +304,12 @@
         /// <value>The selected upload item.</value>
         public SingleFileUpload SelectedUploadItem
         {
-            get => this._selectedUploadItem;
+            get => _selectedUploadItem;
 
             set
             {
-                this._selectedUploadItem = value;
-                NotifyOfPropertyChange(() => this.SelectedUploadItem);
+                _selectedUploadItem = value;
+                NotifyOfPropertyChange(() => SelectedUploadItem);
             }
         }
 
@@ -320,8 +317,8 @@
         /// Gets the select icon command.
         /// </summary>
         /// <value>The select icon command.</value>
-        public ICommand SelectIconCmd => this._selectIconCmd ??
-       (this._selectIconCmd = new DelegateCommand(this.SelectIcon));
+        public ICommand SelectIconCmd => _selectIconCmd ??
+       (_selectIconCmd = new DelegateCommand(SelectIcon));
 
         /// <summary>
         /// Gets or sets a value indicating whether [set version manually].
@@ -330,12 +327,12 @@
         [DataMember]
         public bool SetVersionManually
         {
-            get => this._setVersionManually;
+            get => _setVersionManually;
 
             set
             {
-                this._setVersionManually = value;
-                NotifyOfPropertyChange(() => this.SetVersionManually);
+                _setVersionManually = value;
+                NotifyOfPropertyChange(() => SetVersionManually);
             }
         }
 
@@ -346,12 +343,12 @@
         [DataMember]
         public string SquirrelOutputPath
         {
-            get => this._squirrelOutputPath;
+            get => _squirrelOutputPath;
 
             set
             {
-                this._squirrelOutputPath = value;
-                NotifyOfPropertyChange(() => this.SquirrelOutputPath);
+                _squirrelOutputPath = value;
+                NotifyOfPropertyChange(() => SquirrelOutputPath);
             }
         }
 
@@ -362,12 +359,12 @@
         [DataMember]
         public string Title
         {
-            get => this._title;
+            get => _title;
 
             set
             {
-                this._title = value;
-                NotifyOfPropertyChange(() => this.Title);
+                _title = value;
+                NotifyOfPropertyChange(() => Title);
             }
         }
 
@@ -377,12 +374,12 @@
         /// <value>The upload queue.</value>
         public ObservableCollection<SingleFileUpload> UploadQueue
         {
-            get => this._uploadQueue;
+            get => _uploadQueue;
 
             set
             {
-                this._uploadQueue = value;
-                NotifyOfPropertyChange(() => this.UploadQueue);
+                _uploadQueue = value;
+                NotifyOfPropertyChange(() => UploadQueue);
             }
         }
 
@@ -393,20 +390,16 @@
         [DataMember]
         public string Version
         {
-            get => this._version;
+            get => _version;
 
             set
             {
                 string[] test = value.Split('.');
-                if (test.Length <= 3)
-                {
-                    this._version = value;
-                    NotifyOfPropertyChange(() => this.Version);
-                }
-                else
-                {
-                    if (MessageBox.Show("Please use a Semantic Versioning 2.0.0 standard for the version number i.e. Major.Minor.Build http://semver.org/", "Invalid Version", MessageBoxButton.OK) == MessageBoxResult.OK)
-                    {
+                if (test.Length <= 3) {
+                    _version = value;
+                    NotifyOfPropertyChange(() => Version);
+                } else {
+                    if (MessageBox.Show("Please use a Semantic Versioning 2.0.0 standard for the version number i.e. Major.Minor.Build http://semver.org/", "Invalid Version", MessageBoxButton.OK) == MessageBoxResult.OK) {
                         RefreshPackageVersion(null);
                     }
                 }
@@ -419,23 +412,19 @@
         /// <param name="parm">The parm.</param>
         public void AddDirectory(object parm)
         {
-            if (this.SelectedLink.Count != 1)
-            {
+            if (SelectedLink.Count != 1) {
                 return;
             }
 
-            ItemLink selectedLink = this.SelectedLink[0];
-            if (selectedLink != null)
-            {
-                var validFolderName = GetValidName(this.newFolderName, selectedLink.Children);
+            ItemLink selectedLink = SelectedLink[0];
+            if (selectedLink != null) {
+                var validFolderName = GetValidName(newFolderName, selectedLink.Children);
 
                 selectedLink.Children.Add(new ItemLink { OutputFilename = validFolderName, IsDirectory = true });
-            }
-            else
-            {
-                var validFolderName = GetValidName(this.newFolderName, this.PackageFiles);
+            } else {
+                var validFolderName = GetValidName(newFolderName, PackageFiles);
 
-                this.PackageFiles.Add(new ItemLink { OutputFilename = validFolderName, IsDirectory = true });
+                PackageFiles.Add(new ItemLink { OutputFilename = validFolderName, IsDirectory = true });
             }
         }
 
@@ -445,13 +434,12 @@
         /// <param name="parm">The parm.</param>
         public void EditCurrentConnection(object parm)
         {
-            if (this.SelectedConnection == null)
-            {
+            if (SelectedConnection == null) {
                 return;
             }
 
             var vw = parm as WebConnectionEdit;
-            vw.DataContext = this.SelectedConnection;
+            vw.DataContext = SelectedConnection;
             vw.Visibility = Visibility.Visible;
         }
 
@@ -461,19 +449,17 @@
         /// <param name="parm">The parm.</param>
         public void RefreshPackageVersion(object parm)
         {
-            if (!File.Exists(this.MainExePath))
-            {
+            if (!File.Exists(MainExePath)) {
                 return;
             }
 
-            if (this.SetVersionManually)
-            {
+            if (SetVersionManually) {
                 return;
             }
 
-            var versInfo = FileVersionInfo.GetVersionInfo(this.MainExePath);
+            var versInfo = FileVersionInfo.GetVersionInfo(MainExePath);
 
-            this.Version = $"{versInfo.ProductMajorPart}.{versInfo.ProductMinorPart}.{versInfo.ProductBuildPart}";
+            Version = $"{versInfo.ProductMajorPart}.{versInfo.ProductMinorPart}.{versInfo.ProductBuildPart}";
         }
 
         /// <summary>
@@ -482,12 +468,11 @@
         /// <param name="parm">The parm.</param>
         public void RemoveAllItems(object parm)
         {
-            if (this.SelectedLink?.Count == 0)
-            {
+            if (SelectedLink?.Count == 0) {
                 return;
             }
 
-            RemoveAllFromTreeview(this.SelectedLink[0]);
+            RemoveAllFromTreeview(SelectedLink[0]);
         }
 
         /// <summary>
@@ -496,13 +481,11 @@
         /// <param name="parm">The parm.</param>
         public void RemoveItem(object parm)
         {
-            if (this.SelectedLink?.Count == 0)
-            {
+            if (SelectedLink?.Count == 0) {
                 return;
             }
 
-            foreach (ItemLink link in this.SelectedLink)
-            {
+            foreach (var link in SelectedLink) {
                 RemoveFromTreeview(link);
             }
         }
@@ -520,14 +503,13 @@
                 Filter = "ICON | *.ico"
             };
 
-            System.Windows.Forms.DialogResult o = ofd.ShowDialog();
+            var o = ofd.ShowDialog();
 
-            if (o != System.Windows.Forms.DialogResult.OK || !File.Exists(ofd.FileName))
-            {
+            if (o != System.Windows.Forms.DialogResult.OK || !File.Exists(ofd.FileName)) {
                 return;
             }
 
-            this.IconFilepath = ofd.FileName;
+            IconFilepath = ofd.FileName;
         }
 
         /// <summary>
@@ -537,19 +519,17 @@
         {
             var dialog = new System.Windows.Forms.FolderBrowserDialog();
 
-            if (Directory.Exists(this.NupkgOutputPath))
-            {
-                dialog.SelectedPath = this.NupkgOutputPath;
+            if (Directory.Exists(NupkgOutputPath)) {
+                dialog.SelectedPath = NupkgOutputPath;
             }
 
-            System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+            var result = dialog.ShowDialog();
 
-            if (result != System.Windows.Forms.DialogResult.OK)
-            {
+            if (result != System.Windows.Forms.DialogResult.OK) {
                 return;
             }
 
-            this.NupkgOutputPath = dialog.SelectedPath;
+            NupkgOutputPath = dialog.SelectedPath;
         }
 
         /// <summary>
@@ -559,19 +539,17 @@
         {
             var dialog = new System.Windows.Forms.FolderBrowserDialog();
 
-            if (Directory.Exists(this.SquirrelOutputPath))
-            {
-                dialog.SelectedPath = this.SquirrelOutputPath;
+            if (Directory.Exists(SquirrelOutputPath)) {
+                dialog.SelectedPath = SquirrelOutputPath;
             }
 
-            System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+            var result = dialog.ShowDialog();
 
-            if (result != System.Windows.Forms.DialogResult.OK)
-            {
+            if (result != System.Windows.Forms.DialogResult.OK) {
                 return;
             }
 
-            this.SquirrelOutputPath = dialog.SelectedPath;
+            SquirrelOutputPath = dialog.SelectedPath;
         }
 
         /// <summary>
@@ -580,8 +558,8 @@
         /// <param name="item">The item.</param>
         public void SetSelectedItem(IList<ItemLink> item)
         {
-            this.SelectedLink = item;
-            this.SelectedItem = this.SelectedLink.FirstOrDefault() ?? new ItemLink();
+            SelectedLink = item;
+            SelectedItem = SelectedLink.FirstOrDefault() ?? new ItemLink();
         }
 
         /// <summary>
@@ -590,9 +568,8 @@
         /// <returns></returns>
         public override ValidationResult Validate()
         {
-            ValidationResult commonValid = new Validator().Validate(this);
-            if (!commonValid.IsValid)
-            {
+            var commonValid = new Validator().Validate(this);
+            if (!commonValid.IsValid) {
                 return commonValid;
             }
 
@@ -601,13 +578,11 @@
 
         internal static BitmapImage GetImageFromFilepath(string path)
         {
-            if (!File.Exists(path))
-            {
+            if (!File.Exists(path)) {
                 return null;
             }
 
-            if (File.Exists(path))
-            {
+            if (File.Exists(path)) {
                 var bitmap = new BitmapImage();
                 bitmap.BeginInit();
                 bitmap.CacheOption = BitmapCacheOption.None;
@@ -625,8 +600,7 @@
 
         internal static ObservableCollection<ItemLink> OrderFileList(ObservableCollection<ItemLink> packageFiles)
         {
-            foreach (ItemLink node in packageFiles)
-            {
+            foreach (var node in packageFiles) {
                 node.Children = OrderFileList(node.Children);
             }
 
@@ -636,9 +610,8 @@
         internal void AddFile(string filePath, ItemLink targetItem)
         {
             var isDir = false;
-            FileAttributes fa = File.GetAttributes(filePath);
-            if ((fa & FileAttributes.Directory) != 0)
-            {
+            var fa = File.GetAttributes(filePath);
+            if ((fa & FileAttributes.Directory) != 0) {
                 isDir = true;
             }
 
@@ -646,65 +619,51 @@
 
             var node = new ItemLink() { SourceFilepath = filePath, IsDirectory = isDir };
 
-            ItemLink parent = targetItem;
-            if (targetItem == null)
-            {
+            var parent = targetItem;
+            if (targetItem == null) {
                 //Porto su root
-                this._packageFiles.Add(node);
-            }
-            else
-            {
-                if (!targetItem.IsDirectory)
-                {
-                    parent = targetItem.GetParent(this.PackageFiles);
+                _packageFiles.Add(node);
+            } else {
+                if (!targetItem.IsDirectory) {
+                    parent = targetItem.GetParent(PackageFiles);
                 }
 
-                if (parent != null)
-                {
+                if (parent != null) {
                     //Insert into treeview root
                     parent.Children.Add(node);
-                }
-                else
-                {
+                } else {
                     //Insert into treeview root
-                    this._packageFiles.Add(node);
+                    _packageFiles.Add(node);
                 }
             }
 
-            if (isDir)
-            {
+            if (isDir) {
                 var dir = new DirectoryInfo(filePath);
 
-                FileInfo[] files = dir.GetFiles("*.*", SearchOption.TopDirectoryOnly);
-                DirectoryInfo[] subDirectory = dir.GetDirectories("*.*", SearchOption.TopDirectoryOnly);
+                var files = dir.GetFiles("*.*", SearchOption.TopDirectoryOnly);
+                var subDirectory = dir.GetDirectories("*.*", SearchOption.TopDirectoryOnly);
 
-                foreach (FileInfo f in files)
-                {
+                foreach (var f in files) {
                     AddFile(f.FullName, node);
                 }
 
-                foreach (DirectoryInfo f in subDirectory)
-                {
+                foreach (var f in subDirectory) {
                     AddFile(f.FullName, node);
                 }
-            }
-            else
-            {
+            } else {
                 // I keep the exe filepath, i'll read the version from this file.
                 var ext = Path.GetExtension(filePath).ToLower();
 
-                if (ext == ".exe")
-                {
-                    ItemLink nodeParent = node.GetParent(this.PackageFiles);
-                    if (nodeParent == null)
-                    {
+                if (ext == ".exe") {
+                    var nodeParent = node.GetParent(PackageFiles);
+                    if (nodeParent == null) {
                         var fileName = Path.GetFileNameWithoutExtension(filePath);
-                        this.AppId = fileName;
-                        this.Title = fileName;
-                        this.MainExePath = filePath;
-                        var versInfo = FileVersionInfo.GetVersionInfo(this.MainExePath);
-                        this.Description = versInfo.Comments;
-                        this.Authors = versInfo.CompanyName;
+                        AppId = fileName;
+                        Title = fileName;
+                        MainExePath = filePath;
+                        var versInfo = FileVersionInfo.GetVersionInfo(MainExePath);
+                        Description = versInfo.Comments;
+                        Authors = versInfo.CompanyName;
 
                         RefreshPackageVersion(null);
                     }
@@ -721,17 +680,15 @@
         /// </summary>
         /// <param name="mode">The mode.</param>
         /// <exception cref="Exception"></exception>
-        internal void BeginUpdatedFiles(int mode)
+        internal Task BeginUpdatedFilesAsync(int mode)
         {
-            var releasesPath = this.SquirrelOutputPath;
+            var releasesPath = SquirrelOutputPath;
 
-            if (!Directory.Exists(releasesPath))
-            {
+            if (!Directory.Exists(releasesPath)) {
                 throw new Exception("Releases directory " + releasesPath + "not found !");
             }
 
-            if (this.SelectedConnection == null)
-            {
+            if (SelectedConnection == null) {
                 throw new Exception("No selected upload location !");
             }
 
@@ -741,34 +698,29 @@
                 $"{AppId}-{Version}-delta.nupkg",
             };
 
-            if (mode == 0)
-            {
+            if (mode == 0) {
                 fileToUpdate.Add($"{AppId}-{Version}-full.nupkg");
                 fileToUpdate.Add("Setup.exe");
             }
 
             var updatedFiles = new List<FileInfo>();
 
-            foreach (var fp in fileToUpdate)
-            {
+            foreach (var fp in fileToUpdate) {
                 var ffp = releasesPath + fp;
-                if (!File.Exists(ffp))
-                {
+                if (!File.Exists(ffp)) {
                     continue;
                 }
 
                 updatedFiles.Add(new FileInfo(ffp));
             }
 
-            this.UploadQueue = this.UploadQueue ?? new ObservableCollection<SingleFileUpload>();
+            UploadQueue = UploadQueue ?? new ObservableCollection<SingleFileUpload>();
 
-            this.UploadQueue.Clear();
+            UploadQueue.Clear();
 
-            foreach (WebConnectionBase connection in new List<WebConnectionBase>() { SelectedConnection })
-            {
-                foreach (FileInfo file in updatedFiles)
-                {
-                    this.UploadQueue.Add(new SingleFileUpload()
+            foreach (var connection in new List<WebConnectionBase>() { SelectedConnection }) {
+                foreach (var file in updatedFiles) {
+                    UploadQueue.Add(new SingleFileUpload()
                     {
                         Filename = Path.GetFileName(file.FullName),
                         ConnectionName = connection.ConnectionName,
@@ -779,19 +731,17 @@
                 }
             }
 
-            if (!CheckInternetConnection.IsConnectedToInternet())
-            {
+            if (!CheckInternetConnection.IsConnectedToInternet()) {
                 throw new Exception("Internet Connection not available");
             }
 
-            ProcessNextUploadFile();
+            return ProcessNextUploadFileAsync();
         }
 
         private static string BytesToString(long byteCount)
         {
             string[] suf = { "B", "KB", "MB", "GB", "TB", "PB", "EB" }; //Longs run out around EB
-            if (byteCount == 0)
-            {
+            if (byteCount == 0) {
                 return "0" + suf[0];
             }
 
@@ -805,10 +755,9 @@
         {
             var folderName = newFolderName;
 
-            ItemLink ex = children.FirstOrDefault(i => i.Filename == folderName);
+            var ex = children.FirstOrDefault(i => i.Filename == folderName);
             var index = 0;
-            while (ex != null)
-            {
+            while (ex != null) {
                 index++;
                 folderName = newFolderName + " (" + index + ")";
 
@@ -820,8 +769,7 @@
 
         private static void SearchNodeByFilepath(string filepath, ObservableCollection<ItemLink> root, List<ItemLink> rslt)
         {
-            foreach (ItemLink node in root)
-            {
+            foreach (var node in root) {
 #pragma warning disable RCS1155 // Use StringComparison when comparing strings.
                 if (node.SourceFilepath != null && filepath.ToLower() == node.SourceFilepath.ToLower())
 #pragma warning restore RCS1155 // Use StringComparison when comparing strings.
@@ -833,18 +781,18 @@
             }
         }
 
-        private void Current_OnUploadCompleted(object sender, UploadCompleteEventArgs e)
+        private async void Current_OnUploadCompleted(object sender, UploadCompleteEventArgs e)
         {
-            SingleFileUpload i = e.FileUploaded;
+            var i = e.FileUploaded;
 
-            i.OnUploadCompleted -= this.Current_OnUploadCompleted;
+            i.OnUploadCompleted -= Current_OnUploadCompleted;
 
             Trace.WriteLine("Upload Complete " + i.Filename);
 
             //if (i != null && UploadQueue.Contains(i))
             //    UploadQueue.Remove(i);
 
-            ProcessNextUploadFile();
+            await ProcessNextUploadFileAsync();
         }
 
         private void MoveItem(ItemLink draggedItem, ItemLink targetItem)
@@ -853,96 +801,78 @@
             RemoveFromTreeview(draggedItem);
 
             // Add to target position
-            ItemLink parent = targetItem;
-            if (targetItem == null)
-            {
+            var parent = targetItem;
+            if (targetItem == null) {
                 //Porto su root
-                this._packageFiles.Add(draggedItem);
-            }
-            else
-            {
-                if (!targetItem.IsDirectory)
-                {
-                    parent = targetItem.GetParent(this.PackageFiles);
+                _packageFiles.Add(draggedItem);
+            } else {
+                if (!targetItem.IsDirectory) {
+                    parent = targetItem.GetParent(PackageFiles);
                 }
 
-                if (parent != null)
-                {
+                if (parent != null) {
                     //Insert into treeview root
                     parent.Children.Add(draggedItem);
-                }
-                else
-                {
+                } else {
                     //Insert into treeview root
-                    this._packageFiles.Add(draggedItem);
+                    _packageFiles.Add(draggedItem);
                 }
             }
 
-            NotifyOfPropertyChange(() => this.PackageFiles);
+            NotifyOfPropertyChange(() => PackageFiles);
         }
 
-        private void ProcessNextUploadFile()
+        private async Task ProcessNextUploadFileAsync()
         {
-            try
-            {
-                SingleFileUpload current = this.UploadQueue.FirstOrDefault(u => u.UploadStatus == FileUploadStatus.Queued);
+            try {
+                var current = UploadQueue.FirstOrDefault(u => u.UploadStatus == FileUploadStatus.Queued);
 
-                if (current == null)
-                {
+                if (current == null) {
                     return;
                 }
 
-                current.OnUploadCompleted += this.Current_OnUploadCompleted;
+                current.OnUploadCompleted += Current_OnUploadCompleted;
 
-                current.StartUpload();
-            }
-            catch (Exception ex)
-            {
+                await current.StartUploadAsync();
+            } catch (Exception ex) {
                 MessageBox.Show(ex.ToString());
             }
         }
 
         private void RemoveAllFromTreeview(ItemLink item)
         {
-            ItemLink parent = item.GetParent(this.PackageFiles);
+            var parent = item.GetParent(PackageFiles);
 
             // Element is in the treeview root.
-            if (parent == null)
-            {
-                this._packageFiles.Clear();
-                NotifyOfPropertyChange(() => this.PackageFiles);
-            }
-            else
-            {
+            if (parent == null) {
+                _packageFiles.Clear();
+                NotifyOfPropertyChange(() => PackageFiles);
+            } else {
                 //Remove it from children list
                 parent.Children.Clear();
             }
-            this.MainExePath = string.Empty;
+            MainExePath = string.Empty;
             RefreshPackageVersion(null);
         }
 
         private void RemoveFromTreeview(ItemLink item)
         {
-            ItemLink parent = item.GetParent(this.PackageFiles);
+            var parent = item.GetParent(PackageFiles);
 
 #pragma warning disable RCS1155 // Use StringComparison when comparing strings.
-            if (this.MainExePath != null && item.SourceFilepath != null && this.MainExePath.ToLower() == item.SourceFilepath.ToLower())
+            if (MainExePath != null && item.SourceFilepath != null && MainExePath.ToLower() == item.SourceFilepath.ToLower())
 #pragma warning restore RCS1155 // Use StringComparison when comparing strings.
             {
-                this.MainExePath = string.Empty;
+                MainExePath = string.Empty;
                 RefreshPackageVersion(null);
             }
 
             // Element is in the treeview root.
-            if (parent == null)
-            {
-                if (this._packageFiles.Contains(item))
-                {
-                    this._packageFiles.Remove(item);
+            if (parent == null) {
+                if (_packageFiles.Contains(item)) {
+                    _packageFiles.Remove(item);
                 }
-            }
-            else
-            {
+            } else {
                 //Remove it from children list
                 parent.Children.Remove(item);
             }
@@ -952,10 +882,9 @@
         {
             var list = new List<ItemLink>();
 
-            SearchNodeByFilepath(filepath, this.PackageFiles, list);
+            SearchNodeByFilepath(filepath, PackageFiles, list);
 
-            foreach (ItemLink node in list)
-            {
+            foreach (var node in list) {
                 RemoveFromTreeview(node);
             }
         }
@@ -967,31 +896,28 @@
         /// <param name="connectionType">Type of the connection.</param>
         private void UpdateSelectedConnection(string connectionType)
         {
-            if (string.IsNullOrWhiteSpace(connectionType))
-            {
+            if (string.IsNullOrWhiteSpace(connectionType)) {
                 return;
             }
 
-            this.CachedConnection = this.CachedConnection ?? new List<WebConnectionBase>();
+            CachedConnection = CachedConnection ?? new List<WebConnectionBase>();
 
             WebConnectionBase con = null;
-            switch (connectionType)
-            {
+            switch (connectionType) {
                 case "Amazon S3":
-                    con = this.CachedConnection.Find(c => c is AmazonS3Connection) ?? new AmazonS3Connection();
+                    con = CachedConnection.Find(c => c is AmazonS3Connection) ?? new AmazonS3Connection();
                     break;
 
                 case "File System":
-                    con = this.CachedConnection.Find(c => c is FileSystemConnection) ?? new FileSystemConnection();
+                    con = CachedConnection.Find(c => c is FileSystemConnection) ?? new FileSystemConnection();
                     break;
             }
 
-            if (con != null && !this.CachedConnection.Contains(con))
-            {
-                this.CachedConnection.Add(con);
+            if (con != null && !CachedConnection.Contains(con)) {
+                CachedConnection.Add(con);
             }
 
-            this.SelectedConnection = con;
+            SelectedConnection = con;
         }
 
         private class Validator : AbstractValidator<AutoSquirrelModel>

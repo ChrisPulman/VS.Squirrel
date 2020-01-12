@@ -18,8 +18,7 @@
         /// Gets or sets the data.
         /// </summary>
         /// <value>The data.</value>
-        public object Data
-        {
+        public object Data {
             get => GetValue(DataProperty); set => SetValue(DataProperty, value);
         }
 

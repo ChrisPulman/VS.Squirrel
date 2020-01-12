@@ -58,14 +58,12 @@ namespace AutoSquirrel
         public static ImageSource FindIconForFilename(string fileName, bool large)
         {
             var extension = Path.GetExtension(fileName);
-            if (extension == null)
-            {
+            if (extension == null) {
                 return null;
             }
 
-            Dictionary<string, ImageSource> cache = large ? _largeIconCache : _smallIconCache;
-            if (cache.TryGetValue(extension, out var icon))
-            {
+            var cache = large ? _largeIconCache : _smallIconCache;
+            if (cache.TryGetValue(extension, out var icon)) {
                 return icon;
             }
 
@@ -86,30 +84,25 @@ namespace AutoSquirrel
             // Need to add size check, although errors generated at present!
             var flags = SHGFI_ICON | SHGFI_USEFILEATTRIBUTES;
 
-            if (FolderType.Open == folderType)
-            {
+            if (FolderType.Open == folderType) {
                 flags += SHGFI_OPENICON;
             }
-            if (IconSize.Small == size)
-            {
+            if (IconSize.Small == size) {
                 flags += SHGFI_SMALLICON;
-            }
-            else
-            {
+            } else {
                 flags += SHGFI_LARGEICON;
             }
 
             // Get the folder icon
             var shfi = new SHFILEINFO();
 
-            IntPtr res = SHGetFileInfo(Environment.GetFolderPath(Environment.SpecialFolder.Windows),
+            var res = SHGetFileInfo(Environment.GetFolderPath(Environment.SpecialFolder.Windows),
                 FILE_ATTRIBUTE_DIRECTORY,
                 out shfi,
                 (uint)Marshal.SizeOf(shfi),
                 flags);
 
-            if (res == IntPtr.Zero)
-            {
+            if (res == IntPtr.Zero) {
                 throw Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error());
             }
 
@@ -143,8 +136,7 @@ namespace AutoSquirrel
         /// <returns></returns>
         public static ImageSource ToImageSource(this Icon icon)
         {
-            if (icon == null)
-            {
+            if (icon == null) {
                 return null;
             }
 

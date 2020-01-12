@@ -1,14 +1,12 @@
-﻿//------------------------------------------------------------------------------
-// <copyright file="SquirrelPackagerCommand.cs" company="AIC Solutions Ltd">
-//     Copyright (c) AIC Solutions Ltd.  All rights reserved.
-// </copyright>
-//------------------------------------------------------------------------------
-
-using System;
+﻿using System;
 using System.ComponentModel.Design;
+using System.Globalization;
+using System.Threading;
+using System.Threading.Tasks;
+using AutoSquirrel.Services.Helpers;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using AutoSquirrel.Services.Helpers;
+using Task = System.Threading.Tasks.Task;
 
 namespace AutoSquirrel
 {
@@ -20,78 +18,95 @@ namespace AutoSquirrel
         /// <summary>
         /// Command ID.
         /// </summary>
-        public const int CommandId = 0x0100;
+        public const int CommandId = 257;
 
         /// <summary>
         /// Command menu group (command set GUID).
         /// </summary>
-        public static readonly Guid CommandSet = new Guid("a2e139eb-841b-414f-bcf2-b8745b7b7e4e");
+        public static readonly Guid CommandSet = new Guid("da11996f-24a9-4291-8dbe-bc7906a2cf2c");
 
         /// <summary>
         /// VS Package that provides this command, not null.
         /// </summary>
-        private readonly Package package;
+        private readonly AsyncPackage package;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SquirrelPackagerCommand"/> class. Adds our
-        /// command handlers for menu (commands must exist in the command table file)
+        /// Initializes a new instance of the <see cref="SquirrelPackagerCommand"/> class.
+        /// Adds our command handlers for menu (commands must exist in the command table file)
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
-        /// <exception cref="ArgumentNullException"></exception>
-        private SquirrelPackagerCommand(Package package)
+        /// <param name="commandService">Command service to add command to, not null.</param>
+        private SquirrelPackagerCommand(AsyncPackage package, OleMenuCommandService commandService)
         {
             this.package = package ?? throw new ArgumentNullException(nameof(package));
+            commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
 
-            if (this.ServiceProvider.GetService(typeof(IMenuCommandService)) is OleMenuCommandService commandService)
-            {
-                var menuCommandID = new CommandID(CommandSet, CommandId);
-                var menuItem = new MenuCommand(this.ShowToolWindow, menuCommandID);
-                commandService.AddCommand(menuItem);
-            }
+            var menuCommandID = new CommandID(CommandSet, CommandId);
+            var menuItem = new MenuCommand(Execute, menuCommandID);
+            commandService.AddCommand(menuItem);
+            package.JoinableTaskFactory.RunAsync(async delegate {
+                var windowFrame = await GetWindowFrameAsync();
 
-            IVsWindowFrame windowFrame = GetWindowFrame();
-
-            VSHelper.ProjectIsValid.Subscribe(ok =>
-            {
-                if (ok)
-                {
-                    Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
-                }
-                else
-                {
-                    Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.CloseFrame((uint)__FRAMECLOSE.FRAMECLOSE_SaveIfDirty));
-                }
+                VSHelper.ProjectIsValid.Subscribe(ok => {
+                    package.JoinableTaskFactory.RunAsync(async delegate {
+                        await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
+                        if (ok) {
+                            Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
+                        } else {
+                            Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.CloseFrame((uint)__FRAMECLOSE.FRAMECLOSE_SaveIfDirty));
+                        }
+                    });
+                });
             });
         }
 
         /// <summary>
         /// Gets the instance of the command.
         /// </summary>
-        public static SquirrelPackagerCommand Instance { get; private set; }
+        public static SquirrelPackagerCommand Instance
+        {
+            get;
+            private set;
+        }
 
         /// <summary>
         /// Gets the service provider from the owner package.
         /// </summary>
-        private IServiceProvider ServiceProvider => this.package;
+        private Microsoft.VisualStudio.Shell.IAsyncServiceProvider ServiceProvider
+        {
+            get
+            {
+                return package;
+            }
+        }
 
         /// <summary>
         /// Initializes the singleton instance of the command.
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
-        public static void Initialize(Package package) => Instance = new SquirrelPackagerCommand(package);
-
-        public IVsWindowFrame GetWindowFrame()
+        public static async Task InitializeAsync(AsyncPackage package)
         {
-            // Get the instance number 0 of this tool window. This window is single instance so this
-            // instance is actually the only one. The last flag is set to true so that if the tool
-            // window does not exists it will be created.
-            ToolWindowPane window = this.package.FindToolWindow(typeof(SquirrelPackager), 0, true);
-            if ((window == null) || (window.Frame == null))
-            {
-                throw new NotSupportedException("Cannot create tool window");
-            }
+            // Switch to the main thread - the call to AddCommand in SquirrelPackagerCommand's constructor requires
+            // the UI thread.
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
 
-            return (IVsWindowFrame)window.Frame;
+            var commandService = await package.GetServiceAsync((typeof(IMenuCommandService))) as OleMenuCommandService;
+            Instance = new SquirrelPackagerCommand(package, commandService);
+        }
+
+        public async Task<IVsWindowFrame> GetWindowFrameAsync()
+        {
+            return await package.JoinableTaskFactory.RunAsync(async delegate {
+                // Get the instance number 0 of this tool window. This window is single instance so this
+                // instance is actually the only one. The last flag is set to true so that if the tool
+                // window does not exists it will be created.
+                var window = await package.FindToolWindowAsync(typeof(SquirrelPackager), 0, true, package.DisposalToken);
+                if ((window == null) || (window.Frame == null)) {
+                    throw new NotSupportedException("Cannot create tool window");
+                }
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
+                return (IVsWindowFrame)window.Frame;
+            });
         }
 
         /// <summary>
@@ -99,7 +114,14 @@ namespace AutoSquirrel
         /// </summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event args.</param>
-        /// <exception cref="NotSupportedException"></exception>
-        private void ShowToolWindow(object sender, EventArgs e) => Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(GetWindowFrame().Show());
+        private void Execute(object sender, EventArgs e)
+        {
+            package.JoinableTaskFactory.RunAsync(async delegate {
+                var window = await package.ShowToolWindowAsync(typeof(SquirrelPackager), 0, true, package.DisposalToken);
+                if ((null == window) || (null == window.Frame)) {
+                    throw new NotSupportedException("Cannot create tool window");
+                }
+            });
+        }
     }
 }
