@@ -1,4 +1,4 @@
-namespace AutoSquirrel
+﻿namespace AutoSquirrel
 {
     using System;
     using System.Runtime.Serialization;
@@ -24,12 +24,10 @@ namespace AutoSquirrel
         /// </summary>
         /// <value>The file system path.</value>
         [DataMember]
-        public string FileSystemPath
-        {
+        public string FileSystemPath {
             get => this._fileSystemPath;
 
-            set
-            {
+            set {
                 this._fileSystemPath = value;
 
                 NotifyOfPropertyChange(() => this.FileSystemPath);
@@ -41,10 +39,8 @@ namespace AutoSquirrel
         /// Gets the setup download URL.
         /// </summary>
         /// <value>The setup download URL.</value>
-        public string SetupDownloadUrl
-        {
-            get
-            {
+        public string SetupDownloadUrl {
+            get {
                 if (string.IsNullOrWhiteSpace(this.FileSystemPath))
                 {
                     return "Missing Parameter";

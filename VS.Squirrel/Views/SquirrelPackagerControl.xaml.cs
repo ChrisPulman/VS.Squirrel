@@ -1,13 +1,7 @@
-﻿//------------------------------------------------------------------------------
-// <copyright file="SquirrelPackagerControl.xaml.cs" company="AIC Solutions Ltd">
-//     Copyright (c) AIC Solutions Ltd.  All rights reserved.
-// </copyright>
-//------------------------------------------------------------------------------
-
-namespace AutoSquirrel
+﻿namespace AutoSquirrel
 {
-    using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Input;
@@ -16,27 +10,26 @@ namespace AutoSquirrel
     /// <summary>
     /// Interaction logic for SquirrelPackagerControl.
     /// </summary>
-    public partial class SquirrelPackagerControl
+    public partial class SquirrelPackagerControl : UserControl
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SquirrelPackagerControl"/> class.
         /// </summary>
         public SquirrelPackagerControl()
         {
-            this.DataContext = new ShellViewModel();
-            this.InitializeComponent();
+            DataContext = new ShellViewModel();
+            InitializeComponent();
 
-            this.PackageTreeview.PreviewMouseRightButtonDown += this.OnPreviewMouseRightButtonDown;
-            this.PackageTreeview.SelectedItemChanged += this.PackageTreeview_SelectedItemChanged;
-            this.PublishPackageComplete.Click += this.PublishPackageComplete_Click;
-            this.PublishPackageOnlyUpdate.Click += this.PublishPackageOnlyUpdate_Click;
-            this.WebConnection.IsVisibleChanged += this.WebConnection_IsVisibleChanged;
+            PackageTreeview.PreviewMouseRightButtonDown += OnPreviewMouseRightButtonDown;
+            PackageTreeview.SelectedItemChanged += PackageTreeview_SelectedItemChanged;
+            PublishPackageComplete.Click += PublishPackageComplete_Click;
+            PublishPackageOnlyUpdate.Click += PublishPackageOnlyUpdate_Click;
+            WebConnection.IsVisibleChanged += WebConnection_IsVisibleChanged;
         }
 
         private static TreeView VisualUpwardSearch(DependencyObject source)
         {
-            while (source != null && !(source is TreeView))
-            {
+            while (source != null && !(source is TreeView)) {
                 source = VisualTreeHelper.GetParent(source);
             }
 
@@ -45,7 +38,7 @@ namespace AutoSquirrel
 
         private void OnPreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            TreeView treeViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
+            var treeViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
 
             if (treeViewItem == null) { return; }
 
@@ -58,18 +51,17 @@ namespace AutoSquirrel
             {
                 (sender as TreeView).SelectedItem as ItemLink
             };
-            ((ShellViewModel)this.DataContext).Model.SetSelectedItem(items);
+            ((ShellViewModel)DataContext).Model.SetSelectedItem(items);
         }
 
-        private void PublishPackageComplete_Click(object sender, RoutedEventArgs e) => ((ShellViewModel)this.DataContext).PublishPackageComplete();
+        private void PublishPackageComplete_Click(object sender, RoutedEventArgs e) => ((ShellViewModel)DataContext).PublishPackageComplete();
 
-        private void PublishPackageOnlyUpdate_Click(object sender, RoutedEventArgs e) => ((ShellViewModel)this.DataContext).PublishPackageOnlyUpdate();
+        private void PublishPackageOnlyUpdate_Click(object sender, RoutedEventArgs e) => ((ShellViewModel)DataContext).PublishPackageOnlyUpdate();
 
         private void WebConnection_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (!(bool)e.NewValue)
-            {
-                ((ShellViewModel)this.DataContext).Save();
+            if (!(bool)e.NewValue) {
+                ((ShellViewModel)DataContext).Save();
             }
         }
     }

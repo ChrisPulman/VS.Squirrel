@@ -1,18 +1,12 @@
-﻿//------------------------------------------------------------------------------
-// <copyright file="SquirrelPackager.cs" company="AIC Solutions Ltd">
-//     Copyright (c) AIC Solutions Ltd.  All rights reserved.
-// </copyright>
-//------------------------------------------------------------------------------
+﻿using System;
+using System.Runtime.InteropServices;
+using AutoSquirrel.Services.Helpers;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 
 namespace AutoSquirrel
 {
-    using System;
-    using System.Runtime.InteropServices;
-    using Microsoft.VisualStudio.Shell;
-    using Microsoft.VisualStudio.Shell.Interop;
-    using Microsoft.VisualStudio;
-    using AutoSquirrel.Services.Helpers;
-
     /// <summary>
     /// This class implements the tool window exposed by this package and hosts a user control.
     /// </summary>
@@ -24,7 +18,7 @@ namespace AutoSquirrel
     /// implementation of the IVsUIElementPane interface.
     /// </para>
     /// </remarks>
-    [Guid("8c8923c2-0be9-4003-b7fd-7e272958e828")]
+    [Guid("e37d35fa-ad30-4275-aae3-0d9699f3eb54")]
     public class SquirrelPackager : ToolWindowPane, IVsSelectionEvents, IVsUpdateSolutionEvents
     {
         private uint buildCookie;
@@ -35,17 +29,17 @@ namespace AutoSquirrel
         /// </summary>
         public SquirrelPackager() : base(null)
         {
-            VSHelper.Caption.Subscribe(caption => this.Caption = caption);
+            VSHelper.Caption.Subscribe(caption => Caption = caption);
 
-            // This is the user control hosted by the tool window; Note that, even if this class
-            // implements IDisposable, we are not calling Dispose on this object. This is because
-            // ToolWindowPane calls Dispose on the object returned by the Content property.
-            this.Content = new SquirrelPackagerControl();
+            // This is the user control hosted by the tool window; Note that, even if this class implements IDisposable,
+            // we are not calling Dispose on this object. This is because ToolWindowPane calls Dispose on
+            // the object returned by the Content property.
+            Content = new SquirrelPackagerControl();
         }
 
         public int OnActiveProjectCfgChange(IVsHierarchy pIVsHierarchy)
         {
-            this.Update(pIVsHierarchy);
+            Update(pIVsHierarchy);
             return VSConstants.S_OK;
         }
 
@@ -55,7 +49,7 @@ namespace AutoSquirrel
 
         public int OnSelectionChanged(IVsHierarchy pHierOld, uint itemidOld, IVsMultiItemSelect pMISOld, ISelectionContainer pSCOld, IVsHierarchy pHierNew, uint itemidNew, IVsMultiItemSelect pMISNew, ISelectionContainer pSCNew)
         {
-            this.Update(pHierNew, itemidNew);
+            Update(pHierNew, itemidNew);
             return VSConstants.S_OK;
         }
 
@@ -86,31 +80,24 @@ namespace AutoSquirrel
         }
 
         private void Update(IVsHierarchy pIVsHierarchy, uint itemidNew) =>
-            System.Threading.Tasks.Task.Run(() =>
-                {
-                    if (VSHelper.Options != null && VSHelper.Options.ShowUI && (VSHelper.Options.UseDebug || VSHelper.Options.UseRelease))
-                    {
-                        VSHelper.SetCurrentProject(pIVsHierarchy, itemidNew);
-                    }
-                    else
-                    {
-                        VSHelper.ProjectIsValid.Value = false;
-                    }
-                }).ConfigureAwait(false);
+            System.Threading.Tasks.Task.Run(() => {
+                if (VSHelper.Options != null && VSHelper.Options.ShowUI && (VSHelper.Options.UseDebug || VSHelper.Options.UseRelease)) {
+                    VSHelper.SetCurrentProject(pIVsHierarchy, itemidNew);
+                } else {
+                    VSHelper.ProjectIsValid.Value = false;
+                }
+            }).ConfigureAwait(false);
 
         private void Update(IVsHierarchy pIVsHierarchy) =>
-            System.Threading.Tasks.Task.Run(() =>
-                {
-                    if (VSHelper.Options != null && VSHelper.Options.ShowUI && (VSHelper.Options.UseDebug || VSHelper.Options.UseRelease))
-                    {
-                        EnvDTE.Project pro = VSHelper.GetDTEProject(pIVsHierarchy);
-                        if (pro != null)
-                        {
-                            VSHelper.SetProjectFiles(pro);
-                            return;
-                        }
+            System.Threading.Tasks.Task.Run(() => {
+                if (VSHelper.Options != null && VSHelper.Options.ShowUI && (VSHelper.Options.UseDebug || VSHelper.Options.UseRelease)) {
+                    var pro = VSHelper.GetDTEProject(pIVsHierarchy);
+                    if (pro != null) {
+                        VSHelper.SetProjectFiles(pro);
+                        return;
                     }
-                    VSHelper.ProjectIsValid.Value = false;
-                }).ConfigureAwait(false);
+                }
+                VSHelper.ProjectIsValid.Value = false;
+            }).ConfigureAwait(false);
     }
 }

@@ -1,4 +1,4 @@
-namespace AutoSquirrel
+﻿namespace AutoSquirrel
 {
     using System;
     using System.Collections.Generic;
@@ -28,7 +28,7 @@ namespace AutoSquirrel
         /// <summary>
         /// Initializes a new instance of the <see cref="AmazonS3Connection"/> class.
         /// </summary>
-        public AmazonS3Connection() => this.ConnectionName = "Amazon S3";
+        public AmazonS3Connection() => ConnectionName = "Amazon S3";
 
         /// <summary>
         /// Gets or sets the access key.
@@ -37,12 +37,12 @@ namespace AutoSquirrel
         [DataMember]
         public string AccessKey
         {
-            get => this._accessKey;
+            get => _accessKey;
 
             set
             {
-                this._accessKey = value;
-                NotifyOfPropertyChange(() => this.AccessKey);
+                _accessKey = value;
+                NotifyOfPropertyChange(() => AccessKey);
             }
         }
 
@@ -54,17 +54,15 @@ namespace AutoSquirrel
         {
             get
             {
-                if (this._availableRegionList == null)
-                {
-                    this._availableRegionList = new List<string>();
+                if (_availableRegionList == null) {
+                    _availableRegionList = new List<string>();
 
-                    foreach (RegionEndpoint r in RegionEndpoint.EnumerableAllRegions)
-                    {
-                        this._availableRegionList.Add(r.DisplayName);
+                    foreach (var r in RegionEndpoint.EnumerableAllRegions) {
+                        _availableRegionList.Add(r.DisplayName);
                     }
                 }
 
-                return this._availableRegionList;
+                return _availableRegionList;
             }
         }
 
@@ -75,18 +73,17 @@ namespace AutoSquirrel
         [DataMember]
         public string BucketName
         {
-            get => this._bucketName;
+            get => _bucketName;
 
             set
             {
-                this._bucketName = value;
-                if (this._bucketName != null)
-                {
-                    this._bucketName = this._bucketName.ToLower().Replace(" ", string.Empty);
+                _bucketName = value;
+                if (_bucketName != null) {
+                    _bucketName = _bucketName.ToLower().Replace(" ", string.Empty);
                 }
 
-                NotifyOfPropertyChange(() => this.BucketName);
-                NotifyOfPropertyChange(() => this.SetupDownloadUrl);
+                NotifyOfPropertyChange(() => BucketName);
+                NotifyOfPropertyChange(() => SetupDownloadUrl);
             }
         }
 
@@ -97,14 +94,14 @@ namespace AutoSquirrel
         [DataMember(IsRequired = false)]
         public string FileSystemPath
         {
-            get => this._fileSystemPath;
+            get => _fileSystemPath;
 
             set
             {
-                this._fileSystemPath = value;
+                _fileSystemPath = value;
 
-                NotifyOfPropertyChange(() => this.FileSystemPath);
-                NotifyOfPropertyChange(() => this.SetupDownloadUrl);
+                NotifyOfPropertyChange(() => FileSystemPath);
+                NotifyOfPropertyChange(() => SetupDownloadUrl);
             }
         }
 
@@ -115,13 +112,13 @@ namespace AutoSquirrel
         [DataMember]
         public string RegionName
         {
-            get => this._regionName;
+            get => _regionName;
 
             set
             {
-                this._regionName = value;
-                NotifyOfPropertyChange(() => this.RegionName);
-                NotifyOfPropertyChange(() => this.SetupDownloadUrl);
+                _regionName = value;
+                NotifyOfPropertyChange(() => RegionName);
+                NotifyOfPropertyChange(() => SetupDownloadUrl);
             }
         }
 
@@ -132,12 +129,12 @@ namespace AutoSquirrel
         [DataMember]
         public string SecretAccessKey
         {
-            get => this._secretAccessKey;
+            get => _secretAccessKey;
 
             set
             {
-                this._secretAccessKey = value;
-                NotifyOfPropertyChange(() => this.SecretAccessKey);
+                _secretAccessKey = value;
+                NotifyOfPropertyChange(() => SecretAccessKey);
             }
         }
 
@@ -149,12 +146,11 @@ namespace AutoSquirrel
         {
             get
             {
-                if (string.IsNullOrWhiteSpace(this.BucketName) || string.IsNullOrWhiteSpace(this.RegionName))
-                {
+                if (string.IsNullOrWhiteSpace(BucketName) || string.IsNullOrWhiteSpace(RegionName)) {
                     return "Missing Parameter";
                 }
 
-                return "https://s3-" + GetRegion().SystemName + ".amazonaws.com/" + this.BucketName.ToLower() + "/Setup.exe";
+                return "https://s3-" + GetRegion().SystemName + ".amazonaws.com/" + BucketName.ToLower() + "/Setup.exe";
             }
         }
 
@@ -164,16 +160,15 @@ namespace AutoSquirrel
         /// <returns></returns>
         public override ValidationResult Validate()
         {
-            ValidationResult commonValid = new Validator().Validate(this);
-            if (!commonValid.IsValid)
-            {
+            var commonValid = new Validator().Validate(this);
+            if (!commonValid.IsValid) {
                 return commonValid;
             }
 
             return base.Validate();
         }
 
-        internal RegionEndpoint GetRegion() => RegionEndpoint.EnumerableAllRegions.FirstOrDefault(r => r.DisplayName == this.RegionName);
+        internal RegionEndpoint GetRegion() => RegionEndpoint.EnumerableAllRegions.FirstOrDefault(r => r.DisplayName == RegionName);
 
         private class Validator : AbstractValidator<AmazonS3Connection>
         {
@@ -188,8 +183,7 @@ namespace AutoSquirrel
 
             private static bool CheckBucketName(string bucketName)
             {
-                if (string.IsNullOrWhiteSpace(bucketName) || bucketName.Contains(" "))
-                {
+                if (string.IsNullOrWhiteSpace(bucketName) || bucketName.Contains(" ")) {
                     return false;
                 }
 

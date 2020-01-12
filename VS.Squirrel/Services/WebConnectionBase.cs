@@ -1,4 +1,4 @@
-namespace AutoSquirrel
+﻿namespace AutoSquirrel
 {
     using System;
     using System.Runtime.Serialization;
@@ -16,12 +16,10 @@ namespace AutoSquirrel
         /// </summary>
         /// <value>The name of the connection.</value>
         [DataMember]
-        public string ConnectionName
-        {
+        public string ConnectionName {
             get => this._connectionName;
 
-            set
-            {
+            set {
                 this._connectionName = value;
                 NotifyOfPropertyChange(() => this.ConnectionName);
             }

@@ -1,4 +1,4 @@
-namespace AutoSquirrel
+﻿namespace AutoSquirrel
 {
     using AutoSquirrel;
     using System;
