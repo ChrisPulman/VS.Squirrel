@@ -134,7 +134,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="16.0.205" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="16.0.206" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="16.7.13" />
     <PackageReference Include="AWSSDK.S3" Version="3.3.111.20" />
     <PackageReference Include="Caliburn.Micro" Version="3.2.0" />
