@@ -136,7 +136,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.SDK" Version="16.9.31025.194" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="16.9.1050" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.0.18" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.0.32" />
     <PackageReference Include="Caliburn.Micro" Version="3.2.0" />
     <PackageReference Include="Extended.Wpf.Toolkit" Version="4.0.2" />
     <PackageReference Include="FluentValidation" Version="10.1.0" />
