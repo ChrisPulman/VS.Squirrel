@@ -1,6 +1,7 @@
 ﻿namespace AutoSquirrel
 {
     using System;
+    using System.Threading.Tasks;
     using Caliburn.Micro;
 
     /// <summary>
@@ -13,11 +14,11 @@
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="param">The parameter.</param>
-        public static void ShowWindow<T>(params object[] param) where T : class
+        public static async Task ShowWindowAsync<T>(params object[] param) where T : class
         {
             var windowManager = new WindowManager();
             var viewModel = Activator.CreateInstance(typeof(T), param) as T;
-            windowManager.ShowWindow(viewModel);
+            await windowManager.ShowWindowAsync(viewModel);
         }
     }
 }
