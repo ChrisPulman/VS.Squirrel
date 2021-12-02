@@ -146,7 +146,7 @@
     <PackageReference Include="FluentValidation" Version="10.3.0" />
     <PackageReference Include="MultiSelectTreeView" Version="1.0.9" />
     <PackageReference Include="ReactiveProperty">
-      <Version>7.11.0</Version>
+      <Version>8.0.2</Version>
     </PackageReference>
     <PackageReference Include="squirrel.windows" Version="2.0.1" />
     <PackageReference Include="StrongNamer" Version="0.2.5" />
