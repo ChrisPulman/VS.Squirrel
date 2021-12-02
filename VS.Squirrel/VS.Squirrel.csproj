@@ -143,7 +143,7 @@
     <PackageReference Include="AWSSDK.S3" Version="3.7.7" />
     <PackageReference Include="Caliburn.Micro" Version="4.0.173" />
     <PackageReference Include="Extended.Wpf.Toolkit" Version="4.1.0" />
-    <PackageReference Include="FluentValidation" Version="10.3.0" />
+    <PackageReference Include="FluentValidation" Version="10.3.5" />
     <PackageReference Include="MultiSelectTreeView" Version="1.0.9" />
     <PackageReference Include="ReactiveProperty">
       <Version>8.0.2</Version>
