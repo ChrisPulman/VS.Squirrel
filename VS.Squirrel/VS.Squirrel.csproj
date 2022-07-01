@@ -140,7 +140,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="AWSSDK.S3" Version="3.7.9.11" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.9.20" />
     <PackageReference Include="Caliburn.Micro" Version="4.0.173" />
     <PackageReference Include="Extended.Wpf.Toolkit" Version="4.3.0" />
     <PackageReference Include="FluentValidation" Version="11.0.2" />
