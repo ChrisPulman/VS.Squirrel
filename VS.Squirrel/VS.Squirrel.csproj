@@ -100,19 +100,19 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="tools\candle.exe.config">
-    <IncludeInVSIX>true</IncludeInVSIX>
+      <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="tools\darice.cub">
-    <IncludeInVSIX>true</IncludeInVSIX>
+      <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="tools\light.exe.config">
-    <IncludeInVSIX>true</IncludeInVSIX>
+      <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="tools\template.wxs">
-    <IncludeInVSIX>true</IncludeInVSIX>
+      <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -161,6 +161,10 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="LICENSE.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Content Include="tools\7z.dll">
       <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
