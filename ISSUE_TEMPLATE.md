@@ -1,6 +1,6 @@
 ### Installed product versions
-- Visual Studio: [example 2015 Professional]
-- This extension: [example 1.1.21]
+- Visual Studio: [example 2022 Professional]
+- This extension: [example 2.0.2]
 
 ### Description
 Replace this text with a short description

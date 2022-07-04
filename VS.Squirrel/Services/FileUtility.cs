@@ -23,7 +23,7 @@
         {
             try
             {
-                using (StreamReader file = File.OpenText(filePath))
+                using (var file = File.OpenText(filePath))
                 {
                     var serializer = new JsonSerializer()
                     {

@@ -56,7 +56,7 @@
         /// <returns></returns>
         public override ValidationResult Validate()
         {
-            ValidationResult commonValid = new Validator().Validate(this);
+            var commonValid = new Validator().Validate(this);
             if (!commonValid.IsValid)
             {
                 return commonValid;

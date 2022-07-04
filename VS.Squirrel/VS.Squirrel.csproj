@@ -99,26 +99,22 @@
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
-    <Content Include="tools\candle.exe.config">
-      <IncludeInVSIX>true</IncludeInVSIX>
+    <None Include="tools\candle.exe.config">
+    <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="tools\darice.cub">
+    </None>
+    <None Include="tools\darice.cub">
+    <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="tools\light.exe.config">
+    </None>
+    <None Include="tools\light.exe.config">
+    <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="tools\Squirrel.com">
+    </None>
+    <None Include="tools\template.wxs">
+    <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="tools\template.wxs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
@@ -136,19 +132,22 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.2.32505.173" ExcludeAssets="runtime" />
-    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.2.2186">
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.3.2088">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="AWSSDK.S3" Version="3.7.9.20" />
-    <PackageReference Include="Caliburn.Micro" Version="4.0.173" />
-    <PackageReference Include="Extended.Wpf.Toolkit" Version="4.3.0" />
+    <PackageReference Include="Caliburn.Micro" Version="4.0.210" />
+    <PackageReference Include="DotNetProjects.Extended.Wpf.Toolkit" Version="5.*" />
     <PackageReference Include="FluentValidation" Version="11.1.0" />
     <PackageReference Include="MultiSelectTreeView" Version="1.0.9" />
+    <PackageReference Include="NuGet.Packaging">
+      <Version>6.2.1</Version>
+    </PackageReference>
     <PackageReference Include="ReactiveProperty">
       <Version>8.1.2</Version>
     </PackageReference>
-    <PackageReference Include="squirrel.windows" Version="2.0.1" />
+    <PackageReference Include="Clowd.Squirrel" Version="2.9.42" />
     <PackageReference Include="StrongNamer" Version="0.2.5" />
   </ItemGroup>
   <ItemGroup>
@@ -175,64 +174,64 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="tools\light.exe">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="tools\Microsoft.Deployment.Resources.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="tools\Microsoft.Deployment.WindowsInstaller.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="tools\nuget.exe">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="tools\rcedit.exe">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="tools\Setup.exe">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="tools\signtool.exe">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="tools\Squirrel-Mono.exe">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="tools\singlefilehost.exe">
       <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="tools\Squirrel-Windows.exe">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="tools\Squirrel.exe">
       <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="tools\StubExecutable.exe">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="tools\SyncReleases.exe">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="tools\Update.exe">
       <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="tools\wconsole.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="tools\winterop.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="tools\wix.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="tools\WixNetFxExtension.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="tools\WriteZipToSetup.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Resource Include="Images\add_16.png" />
     <Resource Include="Images\check_black_24.png" />

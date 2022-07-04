@@ -14,6 +14,8 @@
     using System.Reactive.Linq;
     using System.Xml;
     using System.Reactive.Concurrency;
+    using NuGet.Packaging;
+    using NuGet.Versioning;
 
     /// <summary>
     /// Shell View Model
@@ -60,7 +62,7 @@
                 .ObserveOn(DispatcherScheduler.Current)
                 .Subscribe(x => {
                     try {
-                        var IsSquirrelProject = x.Files.Any(s => s.Contains("Squirrel.dll"));
+                        var IsSquirrelProject = x.Files.Any(s => s.Contains("Squirrel"));
                         if (!IsSquirrelProject) {
                             // Project is not using Squirrel
                             VSHelper.ProjectIsValid.Value = false;
@@ -107,7 +109,7 @@
                         // try to retrieve existing settings
                         var file = Path.Combine(ProjectFilePath, $"{Model.AppId}.asproj");
                         if (File.Exists(file)) {
-                            AutoSquirrelModel m = FileUtility.Deserialize<AutoSquirrelModel>(file);
+                            var m = FileUtility.Deserialize<AutoSquirrelModel>(file);
                             if (m != null) {
                                 Model.IconFilepath = m.IconFilepath;
                                 if (!string.IsNullOrWhiteSpace(m?.SelectedConnectionString)) {
@@ -400,8 +402,8 @@
             var metadata = new ManifestMetadata()
             {
                 Id = model.AppId,
-                Authors = model.Authors,
-                Version = model.Version,
+                Authors = new string[] { model.Authors },
+                Version = new NuGetVersion(model.Version),
                 Description = model.Description,
                 Title = model.Title,
             };
@@ -415,7 +417,7 @@
 
             var files = new List<ManifestFile>();
 
-            foreach (ItemLink node in model.PackageFiles) {
+            foreach (var node in model.PackageFiles) {
                 AddFileToPackage(directoryBase, node, files);
             }
 
@@ -557,32 +559,36 @@
             /*
             https://github.com/Squirrel/Squirrel.Windows/blob/c86d3d0f19418d9f31d244f9c1d96d25a9c0dfb6/src/Update/Program.cs
                     "Options:",
-                    { "h|?|help", "Display Help and exit", _ => {} },
-                    { "r=|releaseDir=", "Path to a release directory to use with releasify", v => releaseDir = v},
-                    { "p=|packagesDir=", "Path to the NuGet Packages directory for C# apps", v => packagesDir = v},
-                    { "bootstrapperExe=", "Path to the Setup.exe to use as a template", v => bootstrapperExe = v},
-                    { "g=|loadingGif=", "Path to an animated GIF to be displayed during installation", v => backgroundGif = v},
-                    { "i=|icon", "Path to an ICO file that will be used for icon shortcuts", v => icon = v},
-                    { "setupIcon=", "Path to an ICO file that will be used for the Setup executable's icon", v => setupIcon = v},
-                    { "n=|signWithParams=", "Sign the installer via SignTool.exe with the parameters given", v => signingParameters = v},
-                    { "s|silent", "Silent install", _ => silentInstall = true},
-                    { "b=|baseUrl=", "Provides a base URL to prefix the RELEASES file packages with", v => baseUrl = v, true},
-                    { "a=|process-start-args=", "Arguments that will be used when starting executable", v => processStartArgs = v, true},
-                    { "l=|shortcut-locations=", "Comma-separated string of shortcut locations, e.g. 'Desktop,StartMenu'", v => shortcutArgs = v},
-                    { "no-msi", "Don't generate an MSI package", v => noMsi = true},
+                    [ Global Options ]
+                      -h, -?, --help                  Ignores all other arguments and shows help text
+                      --verbose                   Print extra diagnostic logging
+                    releasify: Take an existing nuget package and convert it into a Squirrel release
+                      -r, --releaseDir=DIRECTORY      Output DIRECTORY for releasified packages
+                      -p, --package=PATH              PATH to a '.nupkg' package to releasify
+                      -n, --signParams=PARAMETERS     Sign files via SignTool.exe using these PARAMETERS
+                          --signTemplate=COMMAND      Use a custom signing COMMAND. '{{file}}' will be
+                                                        replaced by the path of the file to sign.
+                          --noDelta                   Skip the generation of delta packages
+                      -f, --framework=RUNTIMES        List of required RUNTIMES to install during setup
+                                                        example: 'net6,vcredist143'
+                      -s, --splashImage=PATH          PATH to image/gif displayed during installation
+                      -i, --icon=PATH                 PATH to .ico for Setup.exe and Update.exe
+                          --appIcon=PATH              PATH to .ico for 'Apps and Features' list
+                          --msi=BITNESS               Compile a .msi machine-wide deployment tool with the
+                                                        specified BITNESS. (either 'x86' or 'x64')
             */
-            var cmd = $@" -releasify {nugetPackagePath} -releaseDir {squirrelOutputPath} -l 'Desktop'";
+            var cmd = $@" releasify -p {nugetPackagePath} -r {squirrelOutputPath} -l 'Desktop' --allowUnaware";
 
             if (File.Exists(Model.IconFilepath)) {
                 cmd += $@" -i {Model.IconFilepath}";
-                cmd += $@" -setupIcon {Model.IconFilepath}";
+                cmd += $@" --appIcon {Model.IconFilepath}";
             }
 
-            var squirrel = Path.Combine(Path.GetDirectoryName(typeof(ShellViewModel).Assembly.Location), @"tools\Squirrel-Windows.exe");
+            var squirrel = Path.Combine(Path.GetDirectoryName(typeof(ShellViewModel).Assembly.Location), @"tools\Squirrel.exe");
             if (File.Exists(squirrel)) {
                 var startInfo = new ProcessStartInfo()
                 {
-                    WindowStyle = ProcessWindowStyle.Minimized,
+                    WindowStyle = ProcessWindowStyle.Hidden,
                     FileName = squirrel,
 
                     Arguments = cmd,

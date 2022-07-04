@@ -394,7 +394,7 @@
 
             set
             {
-                string[] test = value.Split('.');
+                var test = value.Split('.');
                 if (test.Length <= 3) {
                     _version = value;
                     NotifyOfPropertyChange(() => Version);
@@ -416,7 +416,7 @@
                 return;
             }
 
-            ItemLink selectedLink = SelectedLink[0];
+            var selectedLink = SelectedLink[0];
             if (selectedLink != null) {
                 var validFolderName = GetValidName(newFolderName, selectedLink.Children);
 

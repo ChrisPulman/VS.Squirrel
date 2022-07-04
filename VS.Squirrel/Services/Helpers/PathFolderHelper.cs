@@ -108,7 +108,7 @@
 
                 if (File.Exists(path))
                 {
-                    Preference p = FileUtility.Deserialize<Preference>(path);
+                    var p = FileUtility.Deserialize<Preference>(path);
 
                     // Check if project files still exist.
 

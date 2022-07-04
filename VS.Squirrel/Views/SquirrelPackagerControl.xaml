@@ -473,7 +473,7 @@
                                 <GridView>
                                     <GridView.Columns>
                                         <GridViewColumn
-                                            Width="170"
+                                            Width="270"
                                             DisplayMemberBinding="{Binding Path=Filename}"
                                             Header="Filename" />
                                         <GridViewColumn

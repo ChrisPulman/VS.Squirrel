@@ -169,7 +169,7 @@ namespace AutoSquirrel.Services.Helpers
                 return null;
             }
 
-            hierarchy.GetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_ExtObject, out object obj);
+            hierarchy.GetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_ExtObject, out var obj);
             return obj as Project;
         }
 
@@ -207,14 +207,14 @@ namespace AutoSquirrel.Services.Helpers
                 yield break;
             }
 
-            Guid guid = Guid.Empty;
+            var guid = Guid.Empty;
             solution.GetProjectEnum((uint)flags, ref guid, out var enumHierarchies);
             if (enumHierarchies == null) {
                 yield break;
             }
 
-            IVsHierarchy[] hierarchy = new IVsHierarchy[1];
-            while (enumHierarchies.Next(1, hierarchy, out uint fetched) == VSConstants.S_OK && fetched == 1) {
+            var hierarchy = new IVsHierarchy[1];
+            while (enumHierarchies.Next(1, hierarchy, out var fetched) == VSConstants.S_OK && fetched == 1) {
                 if (hierarchy.Length > 0 && hierarchy[0] != null) {
                     yield return hierarchy[0];
                 }
@@ -304,7 +304,7 @@ namespace AutoSquirrel.Services.Helpers
             var monitorSelection = (IVsMonitorSelection)Package.GetGlobalService(typeof(SVsShellMonitorSelection));
 
             try {
-                monitorSelection.GetCurrentSelection(out IntPtr hierarchyPointer, out var itemId, out IVsMultiItemSelect multiItemSelect, out IntPtr selectionContainerPointer);
+                monitorSelection.GetCurrentSelection(out var hierarchyPointer, out var itemId, out var multiItemSelect, out var selectionContainerPointer);
 
                 if (Marshal.GetTypedObjectForIUnknown(hierarchyPointer, typeof(IVsHierarchy)) is IVsHierarchy selectedHierarchy) {
                     ErrorHandler.ThrowOnFailure(selectedHierarchy.GetProperty(itemId, (int)__VSHPROPID.VSHPROPID_ExtObject, out selectedObject));

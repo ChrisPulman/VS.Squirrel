@@ -39,3 +39,6 @@ on the official Visual Studio extension gallery.
 
 ## 0.0.12
 - [x] Show warnings for missing settings in project AssemblyInfo
+
+## 2.0.2
+- [x] Change package base to Clowd.Squirrel

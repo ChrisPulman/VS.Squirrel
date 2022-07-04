@@ -17,7 +17,7 @@
         {
             try
             {
-                return InternetGetConnectedState(out int desc, 0);
+                return InternetGetConnectedState(out var desc, 0);
             }
             catch
             {
