@@ -137,7 +137,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="AWSSDK.S3" Version="3.7.9.63" />
-    <PackageReference Include="Caliburn.Micro" Version="4.0.210" />
+    <PackageReference Include="Caliburn.Micro" Version="4.0.212" />
     <PackageReference Include="DotNetProjects.Extended.Wpf.Toolkit" Version="5.*" />
     <PackageReference Include="FluentValidation" Version="11.2.1" />
     <PackageReference Include="MultiSelectTreeView" Version="1.0.9" />
