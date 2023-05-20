@@ -147,7 +147,7 @@
     <PackageReference Include="ReactiveProperty">
       <Version>9.1.2</Version>
     </PackageReference>
-    <PackageReference Include="Clowd.Squirrel" Version="2.9.42" />
+    <PackageReference Include="Clowd.Squirrel" Version="2.9.48" />
     <PackageReference Include="StrongNamer" Version="0.2.5" />
   </ItemGroup>
   <ItemGroup>
