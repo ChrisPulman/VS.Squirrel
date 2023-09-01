@@ -139,7 +139,7 @@
     <PackageReference Include="AWSSDK.S3" Version="3.7.201.5" />
     <PackageReference Include="Caliburn.Micro" Version="4.0.212" />
     <PackageReference Include="DotNetProjects.Extended.Wpf.Toolkit" Version="5.*" />
-    <PackageReference Include="FluentValidation" Version="11.6.0" />
+    <PackageReference Include="FluentValidation" Version="11.7.1" />
     <PackageReference Include="MultiSelectTreeView" Version="1.0.9" />
     <PackageReference Include="NuGet.Packaging">
       <Version>6.6.1</Version>
